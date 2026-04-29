@@ -1,0 +1,299 @@
+/* =====================
+   AUTH MODAL OVERLAY
+   ===================== */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 40, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.auth-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* =====================
+   MODAL CARD
+   ===================== */
+.auth-modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 400px;
+  margin: 16px;
+  box-shadow: 0 16px 48px rgba(26, 79, 138, 0.2);
+  overflow: hidden;
+  transform: translateY(12px);
+  transition: transform 0.2s;
+}
+
+.auth-overlay.open .auth-modal {
+  transform: translateY(0);
+}
+
+/* =====================
+   MODAL HEADER
+   ===================== */
+.auth-modal-header {
+  background: var(--ctu-blue);
+  padding: 20px 24px 0;
+  position: relative;
+}
+
+.auth-modal-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.auth-modal-logo {
+  width: 32px;
+  height: 32px;
+  background: var(--ctu-orange);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.auth-modal-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.auth-modal-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+}
+
+/* Auth modal header row (title + close) — in styles.css utility section */
+/* Close button is positioned absolute top-right of the header */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+
+.auth-tab.active {
+  color: #fff;
+  border-bottom-color: var(--ctu-orange);
+}
+
+.auth-tab:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* =====================
+   MODAL BODY
+   ===================== */
+.auth-modal-body {
+  padding: 24px;
+}
+
+.auth-form {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-form.active {
+  display: flex;
+}
+
+/* =====================
+   FORM FIELDS
+   ===================== */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.auth-field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.auth-field input,
+.auth-field select {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border-strong);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.auth-field input:focus,
+.auth-field select:focus {
+  border-color: var(--ctu-blue);
+  box-shadow: 0 0 0 3px var(--ctu-blue-light);
+}
+
+.auth-field select {
+  cursor: pointer;
+}
+
+/* Row layout for two fields side by side */
+.auth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* =====================
+   ERROR MESSAGE
+   ===================== */
+.auth-error {
+  display: none;
+  background: #fef2f2;
+  border: 0.5px solid #fca5a5;
+  color: #c0392b;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  line-height: 1.4;
+}
+
+/* =====================
+   SUBMIT BUTTON
+   ===================== */
+.auth-submit {
+  width: 100%;
+  padding: 11px;
+  background: var(--ctu-blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  margin-top: 2px;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: var(--ctu-blue-mid);
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =====================
+   FOOTER LINK
+   ===================== */
+.auth-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-hint);
+  margin-top: 4px;
+}
+
+.auth-footer a {
+  color: var(--ctu-blue);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* =====================
+   NAV USER INFO (logged-in state)
+   ===================== */
+.nav-user-info {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ctu-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.nav-user-name {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-logout {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+@media (max-width: 480px) {
+  .auth-row {
+    grid-template-columns: 1fr;
+  }
+}
