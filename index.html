@@ -3,27 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CTU Capstone Repository - Search and explore capstone projects from CTU Daanbantayan Campus with AI-powered search" />
   <title>CTU Capstone Repository — AI-Integrated Metadata Repository</title>
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="app">
 
   <!-- =====================
        NAVIGATION
        ===================== -->
-  <nav class="nav">
+  <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav-brand">
-      <div class="nav-logo">CTU</div>
+      <div class="nav-logo" aria-hidden="true">CTU</div>
       <div>
         <div class="nav-title">RECAP</div>
         <div class="nav-subtitle">Online Repository for Capstone Projects</div>
       </div>
     </div>
     <div class="nav-actions">
-      <button class="btn btn-ghost btn-about">About</button>
+      <button class="btn btn-ghost btn-about" aria-label="About RECAP">About</button>
+      
+      <!-- Dark Mode Toggle -->
+      <button class="btn btn-ghost btn-icon" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
 
       <!-- Logged-out state -->
       <button class="btn btn-ghost" id="nav-register-btn" onclick="openAuthModal('register')">Sign Up</button>
@@ -31,9 +57,9 @@
 
       <!-- Logged-in state (hidden until auth resolves) -->
       <div class="nav-user-info" id="nav-user-info">
-        <div class="nav-user-avatar" id="nav-user-avatar">U</div>
+        <div class="nav-user-avatar" id="nav-user-avatar" aria-hidden="true">U</div>
         <span class="nav-user-name" id="nav-user-name">User</span>
-        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        <button class="btn-logout" onclick="handleLogout()" aria-label="Logout">Logout</button>
       </div>
     </div>
   </nav>
@@ -41,25 +67,47 @@
   <!-- =====================
        PAGE TABS
        ===================== -->
-  <div class="page-tabs">
-    <div class="tab active" onclick="switchView('landing')">Search / Landing</div>
-    <div class="tab" onclick="switchView('dashboard')">User Dashboard</div>
-    <div class="tab" onclick="switchView('detail')">Project Detail</div>
-    <div class="tab" onclick="switchView('chatbot')">AI Chatbot</div>
+  <div class="page-tabs" role="tablist" aria-label="Main sections">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="view-landing" onclick="switchView('landing')" tabindex="0">
+      <span class="tab-indicator"></span>
+      Search / Landing
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-dashboard" onclick="switchView('dashboard')" tabindex="-1">
+      <span class="tab-indicator"></span>
+      User Dashboard
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-detail" onclick="switchView('detail')" tabindex="-1">
+      <span class="tab-indicator"></span>
+      Project Detail
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-chatbot" onclick="switchView('chatbot')" tabindex="-1">
+      <span class="tab-indicator"></span>
+      AI Chatbot
+    </button>
   </div>
 
   <!-- =====================
        LANDING VIEW
        ===================== -->
-  <div class="view active" id="view-landing">
+  <main id="main-content" class="view active" id="view-landing" role="tabpanel" aria-labelledby="tab-landing">
     <div class="hero">
       <h1>Find Your Next Research Breakthrough</h1>
       <p>Search thousands of capstone projects from CTU Daanbantayan Campus</p>
       <div class="search-wrap">
-        <input class="search-bar" type="text" placeholder="Search by title, author, keyword, or topic..." />
-        <span class="search-icon">⌕</span>
+        <input 
+          class="search-bar" 
+          type="search" 
+          id="main-search" 
+          placeholder="Search by title, author, keyword, or topic..." 
+          aria-label="Search capstone projects"
+          autocomplete="off"
+        />
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <div class="search-loading" id="search-loading" aria-hidden="true">
+          <div class="spinner"></div>
+        </div>
       </div>
-      <div class="search-toggle">
+      <div class="search-toggle" role="switch" aria-checked="true" aria-label="Natural Language Search" tabindex="0" onclick="toggleNLSearch()" onkeydown="if(event.key==='Enter'||event.key===' ') toggleNLSearch()">
         <div class="toggle-pill"><div class="toggle-dot"></div></div>
         <span class="toggle-label">Natural Language Search</span>
         <span class="toggle-badge">AI</span>
@@ -69,56 +117,98 @@
     <div class="content-grid">
 
       <!-- Sidebar Filters -->
-      <div class="sidebar">
-        <h3>Filters</h3>
+      <aside class="sidebar" role="complementary" aria-label="Search filters">
+        <div class="sidebar-header">
+          <h3>Filters</h3>
+          <button class="btn-clear-filters" onclick="clearAllFilters()" aria-label="Clear all filters">Clear all</button>
+        </div>
+        
+        <!-- Active Filters Chips -->
+        <div class="active-filters" id="active-filters" role="status" aria-live="polite" aria-atomic="true"></div>
 
         <div class="filter-section">
-          <div class="filter-title">Year <span class="filter-chevron">▼</span></div>
-          <div class="filter-item"><input type="checkbox" id="y1" checked><label for="y1">2024</label><span class="filter-count">42</span></div>
-          <div class="filter-item"><input type="checkbox" id="y2"><label for="y2">2023</label><span class="filter-count">38</span></div>
-          <div class="filter-item"><input type="checkbox" id="y3"><label for="y3">2022</label><span class="filter-count">31</span></div>
-          <div class="filter-item"><input type="checkbox" id="y4"><label for="y4">2021</label><span class="filter-count">24</span></div>
+          <button class="filter-title" aria-expanded="true" aria-controls="filter-year" onclick="toggleFilterSection(this)">
+            Year <span class="filter-chevron" aria-hidden="true">▼</span>
+          </button>
+          <div class="filter-content" id="filter-year">
+            <div class="filter-item"><input type="checkbox" id="y1" checked onchange="updateFilters()"><label for="y1">2024</label><span class="filter-count" aria-label="42 results">42</span></div>
+            <div class="filter-item"><input type="checkbox" id="y2" onchange="updateFilters()"><label for="y2">2023</label><span class="filter-count" aria-label="38 results">38</span></div>
+            <div class="filter-item"><input type="checkbox" id="y3" onchange="updateFilters()"><label for="y3">2022</label><span class="filter-count" aria-label="31 results">31</span></div>
+            <div class="filter-item"><input type="checkbox" id="y4" onchange="updateFilters()"><label for="y4">2021</label><span class="filter-count" aria-label="24 results">24</span></div>
+          </div>
         </div>
 
         <div class="filter-section">
-          <div class="filter-title">Program <span class="filter-chevron">▼</span></div>
-          <div class="filter-item"><input type="checkbox" id="p1" checked><label for="p1">BSIT</label><span class="filter-count">58</span></div>
-          <div class="filter-item"><input type="checkbox" id="p2"><label for="p2">BSCS</label><span class="filter-count">24</span></div>
-          <div class="filter-item"><input type="checkbox" id="p3"><label for="p3">BSED</label><span class="filter-count">19</span></div>
-          <div class="filter-item"><input type="checkbox" id="p4"><label for="p4">BSAgriBusiness</label><span class="filter-count">12</span></div>
+          <button class="filter-title" aria-expanded="true" aria-controls="filter-program" onclick="toggleFilterSection(this)">
+            Program <span class="filter-chevron" aria-hidden="true">▼</span>
+          </button>
+          <div class="filter-content" id="filter-program">
+            <div class="filter-item"><input type="checkbox" id="p1" checked onchange="updateFilters()"><label for="p1">BSIT</label><span class="filter-count" aria-label="58 results">58</span></div>
+            <div class="filter-item"><input type="checkbox" id="p2" onchange="updateFilters()"><label for="p2">BSCS</label><span class="filter-count" aria-label="24 results">24</span></div>
+            <div class="filter-item"><input type="checkbox" id="p3" onchange="updateFilters()"><label for="p3">BSED</label><span class="filter-count" aria-label="19 results">19</span></div>
+            <div class="filter-item"><input type="checkbox" id="p4" onchange="updateFilters()"><label for="p4">BSAgriBusiness</label><span class="filter-count" aria-label="12 results">12</span></div>
+          </div>
         </div>
 
         <div class="filter-section">
-          <div class="filter-title">Research Topic <span class="filter-chevron">▼</span></div>
-          <div class="filter-item"><input type="checkbox" id="t1" checked><label for="t1">Machine Learning</label></div>
-          <div class="filter-item"><input type="checkbox" id="t2"><label for="t2">IoT / Hardware</label></div>
-          <div class="filter-item"><input type="checkbox" id="t3"><label for="t3">Web Development</label></div>
-          <div class="filter-item"><input type="checkbox" id="t4"><label for="t4">Mobile Apps</label></div>
-          <div class="filter-item"><input type="checkbox" id="t5"><label for="t5">Data Analytics</label></div>
+          <button class="filter-title" aria-expanded="true" aria-controls="filter-topic" onclick="toggleFilterSection(this)">
+            Research Topic <span class="filter-chevron" aria-hidden="true">▼</span>
+          </button>
+          <div class="filter-content" id="filter-topic">
+            <div class="filter-item"><input type="checkbox" id="t1" checked onchange="updateFilters()"><label for="t1">Machine Learning</label></div>
+            <div class="filter-item"><input type="checkbox" id="t2" onchange="updateFilters()"><label for="t2">IoT / Hardware</label></div>
+            <div class="filter-item"><input type="checkbox" id="t3" onchange="updateFilters()"><label for="t3">Web Development</label></div>
+            <div class="filter-item"><input type="checkbox" id="t4" onchange="updateFilters()"><label for="t4">Mobile Apps</label></div>
+            <div class="filter-item"><input type="checkbox" id="t5" onchange="updateFilters()"><label for="t5">Data Analytics</label></div>
+          </div>
         </div>
 
         <div class="filter-section">
-          <div class="filter-title">Keywords</div>
-          <input type="text" class="filter-keyword-input" placeholder="e.g. Arduino, React..." />
+          <label for="keyword-input" class="filter-title-label">Keywords</label>
+          <input 
+            type="text" 
+            id="keyword-input" 
+            class="filter-keyword-input" 
+            placeholder="e.g. Arduino, React..." 
+            aria-label="Filter by keywords"
+            oninput="debouncedKeywordSearch(this.value)"
+          />
         </div>
-
-        <button class="btn btn-blue btn-sidebar-apply">Apply Filters</button>
-        <button class="btn btn-outline btn-sidebar-clear">Clear All</button>
-      </div>
+      </aside>
 
       <!-- Search Results -->
       <div>
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="#" onclick="return false">Home</a></li>
+            <li aria-current="page">Search Results</li>
+          </ol>
+        </nav>
+        
         <div class="results-header">
-          <span class="results-count">Showing <strong>42</strong> results for "machine learning BSIT 2024"</span>
-          <select class="sort-select">
-            <option>Sort: Most Relevant</option>
-            <option>Sort: Newest First</option>
-            <option>Sort: Oldest First</option>
+          <span class="results-count" role="status" aria-live="polite" aria-atomic="true">
+            Showing <strong id="results-total">42</strong> results for "<span id="results-query">machine learning BSIT 2024</span>"
+          </span>
+          <select class="sort-select" aria-label="Sort results" onchange="sortResults(this.value)">
+            <option value="relevant">Sort: Most Relevant</option>
+            <option value="newest">Sort: Newest First</option>
+            <option value="oldest">Sort: Oldest First</option>
           </select>
         </div>
+        
+        <!-- Loading Skeleton -->
+        <div class="loading-skeleton" id="loading-skeleton" style="display: none;" aria-hidden="true">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="results-container">
 
         <!-- Result Card 1 -->
-        <div class="result-card" onclick="switchView('detail')">
+        <article class="result-card" onclick="switchView('detail')" onkeydown="if(event.key==='Enter') switchView('detail')" tabindex="0" role="button" aria-label="View project: Smart Attendance Monitoring System">
           <div class="result-card-top">
             <div class="result-title">Smart Attendance Monitoring System Using Facial Recognition with Machine Learning for CTU Daanbantayan Campus</div>
             <span class="result-year">2024</span>
@@ -135,13 +225,17 @@
             <span class="tag tag-orange">Machine Learning</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn">☆ Save</button>
-            <button class="view-btn" onclick="switchView('detail')">View Details →</button>
+            <button class="save-btn ripple" onclick="event.stopPropagation(); toggleSave(this)" aria-label="Save project">
+              <span class="save-icon">☆</span> Save
+            </button>
+            <button class="view-btn ripple" onclick="event.stopPropagation(); switchView('detail')" aria-label="View project details">
+              View Details →
+            </button>
           </div>
-        </div>
+        </article>
 
         <!-- Result Card 2 -->
-        <div class="result-card">
+        <article class="result-card" tabindex="0" role="button" aria-label="View project: IoT-Based Soil Moisture Detection System">
           <div class="result-card-top">
             <div class="result-title">IoT-Based Soil Moisture Detection System Using Arduino for Precision Agriculture in Coastal Communities</div>
             <span class="result-year">2024</span>
@@ -158,13 +252,17 @@
             <span class="tag tag-orange">Hardware</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn">☆ Save</button>
-            <button class="view-btn">View Details →</button>
+            <button class="save-btn ripple" onclick="event.stopPropagation(); toggleSave(this)" aria-label="Save project">
+              <span class="save-icon">☆</span> Save
+            </button>
+            <button class="view-btn ripple" onclick="event.stopPropagation()" aria-label="View project details">
+              View Details →
+            </button>
           </div>
-        </div>
+        </article>
 
         <!-- Result Card 3 -->
-        <div class="result-card">
+        <article class="result-card" tabindex="0" role="button" aria-label="View project: Web-Based Inventory Management System">
           <div class="result-card-top">
             <div class="result-title">Web-Based Inventory Management System with Predictive Analytics for Small Businesses in Daanbantayan</div>
             <span class="result-year">2023</span>
@@ -180,14 +278,28 @@
             <span class="tag">Predictive Analytics</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn">☆ Save</button>
-            <button class="view-btn">View Details →</button>
+            <button class="save-btn ripple" onclick="event.stopPropagation(); toggleSave(this)" aria-label="Save project">
+              <span class="save-icon">☆</span> Save
+            </button>
+            <button class="view-btn ripple" onclick="event.stopPropagation()" aria-label="View project details">
+              View Details →
+            </button>
           </div>
+        </article>
+        
+        </div><!-- #results-container -->
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <div class="empty-icon" aria-hidden="true">🔍</div>
+          <h3>No results found</h3>
+          <p>Try adjusting your filters or search terms</p>
+          <button class="btn btn-blue ripple" onclick="clearAllFilters()">Clear all filters</button>
         </div>
 
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- =====================
        DASHBOARD VIEW

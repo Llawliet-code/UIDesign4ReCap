@@ -3,17 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CTU Daanbantayan Campus AI-Integrated Capstone Repository - Search and explore thousands of research projects">
   <title>CTU Capstone Repository — AI-Integrated Metadata Repository</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="app">
 
   <!-- =====================
        NAVIGATION
        ===================== -->
-  <nav class="nav">
+  <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav-brand">
       <div class="nav-logo">CTU</div>
       <div>
@@ -22,51 +28,103 @@
       </div>
     </div>
     <div class="nav-actions">
-      <button class="btn btn-ghost" style="font-size:12px">About</button>
-      <button class="btn btn-orange" onclick="switchView('dashboard')">Login</button>
+      <button class="btn btn-ghost" style="font-size:12px" aria-label="About CTU RECAP">About</button>
+      <button 
+        id="theme-toggle" 
+        class="btn btn-ghost theme-toggle" 
+        aria-label="Toggle dark mode"
+        title="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <button class="btn btn-orange" onclick="switchView('dashboard')" aria-label="Login to dashboard">Login</button>
     </div>
   </nav>
 
   <!-- =====================
        PAGE TABS
        ===================== -->
-  <div class="page-tabs">
-    <div class="tab active" onclick="switchView('landing')">Search / Landing</div>
-    <div class="tab" onclick="switchView('dashboard')">User Dashboard</div>
-    <div class="tab" onclick="switchView('detail')">Project Detail</div>
-    <div class="tab" onclick="switchView('chatbot')">AI Chatbot</div>
+  <div class="page-tabs" role="tablist" aria-label="Page navigation">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="view-landing" onclick="switchView('landing')" tabindex="0">
+      Search / Landing
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-dashboard" onclick="switchView('dashboard')" tabindex="-1">
+      User Dashboard
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-detail" onclick="switchView('detail')" tabindex="-1">
+      Project Detail
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-chatbot" onclick="switchView('chatbot')" tabindex="-1">
+      AI Chatbot
+    </button>
   </div>
 
   <!-- =====================
        LANDING VIEW
        ===================== -->
-  <div class="view active" id="view-landing">
+  <div class="view active" id="view-landing" role="tabpanel" aria-labelledby="tab-landing">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="#" aria-current="page">Home</a></li>
+      </ol>
+    </nav>
+    <main id="main-content">
     <div class="hero">
-      <h1>Find Your Next Research Breakthrough</h1>
-      <p>Search thousands of capstone projects from CTU Daanbantayan Campus</p>
-      <div class="search-wrap">
-        <input class="search-bar" type="text" placeholder="Search by title, author, keyword, or topic..." />
-        <span class="search-icon">⌕</span>
+      <h1 class="fade-in">Find Your Next Research Breakthrough</h1>
+      <p class="fade-in">Search thousands of capstone projects from CTU Daanbantayan Campus</p>
+      <div class="search-wrap fade-in">
+        <input 
+          class="search-bar" 
+          type="search" 
+          id="main-search"
+          placeholder="Search by title, author, keyword, or topic..." 
+          aria-label="Search capstone projects"
+          autocomplete="off" />
+        <span class="search-icon" aria-hidden="true">⌕</span>
       </div>
-      <div class="search-toggle">
+      <div class="search-toggle fade-in" role="switch" aria-checked="true" aria-label="Natural Language Search" tabindex="0">
         <div class="toggle-pill"><div class="toggle-dot"></div></div>
         <span class="toggle-label">Natural Language Search</span>
-        <span class="toggle-badge">AI</span>
+        <span class="toggle-badge" aria-label="AI powered">AI</span>
       </div>
+    </div>
+    
+    <!-- Active Filters Display -->
+    <div class="active-filters" id="active-filters" role="region" aria-label="Active filters">
+      <!-- Dynamically populated filter chips -->
     </div>
 
     <div class="content-grid">
 
       <!-- Sidebar Filters -->
-      <div class="sidebar">
+      <aside class="sidebar" role="complementary" aria-label="Search filters">
         <h3>Filters</h3>
 
         <div class="filter-section">
-          <div class="filter-title">Year <span style="font-size:10px;color:var(--text-hint)">▼</span></div>
-          <div class="filter-item"><input type="checkbox" id="y1" checked><label for="y1">2024</label><span class="filter-count">42</span></div>
-          <div class="filter-item"><input type="checkbox" id="y2"><label for="y2">2023</label><span class="filter-count">38</span></div>
-          <div class="filter-item"><input type="checkbox" id="y3"><label for="y3">2022</label><span class="filter-count">31</span></div>
-          <div class="filter-item"><input type="checkbox" id="y4"><label for="y4">2021</label><span class="filter-count">24</span></div>
+          <div class="filter-title" role="button" tabindex="0" aria-expanded="true">
+            Year <span class="filter-arrow" aria-hidden="true">▼</span>
+          </div>
+          <div class="filter-content">
+            <div class="filter-item">
+              <input type="checkbox" id="y1" checked class="filter-checkbox" aria-label="Filter by year 2024">
+              <label for="y1">2024</label>
+              <span class="filter-count" aria-label="42 projects">42</span>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="y2" class="filter-checkbox" aria-label="Filter by year 2023">
+              <label for="y2">2023</label>
+              <span class="filter-count" aria-label="38 projects">38</span>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="y3" class="filter-checkbox" aria-label="Filter by year 2022">
+              <label for="y3">2022</label>
+              <span class="filter-count" aria-label="31 projects">31</span>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="y4" class="filter-checkbox" aria-label="Filter by year 2021">
+              <label for="y4">2021</label>
+              <span class="filter-count" aria-label="24 projects">24</span>
+            </div>
+          </div>
         </div>
 
         <div class="filter-section">
@@ -96,26 +154,39 @@
           />
         </div>
 
-        <button class="btn btn-blue" style="width:100%;margin-top:4px;font-size:13px">Apply Filters</button>
-        <button class="btn btn-outline" style="width:100%;margin-top:6px;font-size:13px">Clear All</button>
-      </div>
+        <button class="btn btn-blue ripple" style="width:100%;margin-top:4px;font-size:13px" aria-label="Apply selected filters">
+          Apply Filters
+        </button>
+        <button class="btn btn-outline ripple" style="width:100%;margin-top:6px;font-size:13px" aria-label="Clear all filters">
+          Clear All
+        </button>
+      </aside>
 
       <!-- Search Results -->
-      <div>
+      <div role="region" aria-label="Search results">
         <div class="results-header">
-          <span class="results-count">Showing <strong>42</strong> results for "machine learning BSIT 2024"</span>
-          <select class="sort-select">
+          <span class="results-count" role="status" aria-live="polite">
+            Showing <strong>42</strong> results for "machine learning BSIT 2024"
+          </span>
+          <select class="sort-select" aria-label="Sort results">
             <option>Sort: Most Relevant</option>
             <option>Sort: Newest First</option>
             <option>Sort: Oldest First</option>
           </select>
         </div>
+        
+        <!-- Loading Skeleton (hidden by default) -->
+        <div class="loading-skeleton" id="loading-skeleton" style="display:none;" aria-hidden="true">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
 
         <!-- Result Card 1 -->
-        <div class="result-card" onclick="switchView('detail')">
+        <article class="result-card card-hover" onclick="switchView('detail')" role="article" tabindex="0">
           <div class="result-card-top">
-            <div class="result-title">Smart Attendance Monitoring System Using Facial Recognition with Machine Learning for CTU Daanbantayan Campus</div>
-            <span class="result-year">2024</span>
+            <h2 class="result-title">Smart Attendance Monitoring System Using Facial Recognition with Machine Learning for CTU Daanbantayan Campus</h2>
+            <span class="result-year" aria-label="Published in 2024">2024</span>
           </div>
           <div class="result-meta">
             <span>👤 Reyes, A. · Santos, M. · Dela Cruz, J.</span>
@@ -129,15 +200,19 @@
             <span class="tag tag-orange">Machine Learning</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn">☆ Save</button>
-            <button class="view-btn" onclick="switchView('detail')">View Details →</button>
+            <button class="save-btn ripple" aria-label="Save this project" aria-pressed="false">
+              <span aria-hidden="true">☆</span> Save
+            </button>
+            <button class="view-btn ripple" onclick="switchView('detail')" aria-label="View project details">
+              View Details →
+            </button>
           </div>
-        </div>
+        </article>
 
         <!-- Result Card 2 -->
-        <div class="result-card">
+        <article class="result-card card-hover" role="article" tabindex="0">
           <div class="result-card-top">
-            <div class="result-title">IoT-Based Soil Moisture Detection System Using Arduino for Precision Agriculture in Coastal Communities</div>
+            <h2 class="result-title">IoT-Based Soil Moisture Detection System Using Arduino for Precision Agriculture in Coastal Communities</h2>
             <span class="result-year">2024</span>
           </div>
           <div class="result-meta">
@@ -152,15 +227,17 @@
             <span class="tag tag-orange">Hardware</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn">☆ Save</button>
-            <button class="view-btn">View Details →</button>
+            <button class="save-btn ripple" aria-label="Save this project" aria-pressed="false">
+              <span aria-hidden="true">☆</span> Save
+            </button>
+            <button class="view-btn ripple" aria-label="View project details">View Details →</button>
           </div>
-        </div>
+        </article>
 
         <!-- Result Card 3 -->
-        <div class="result-card">
+        <article class="result-card card-hover" role="article" tabindex="0">
           <div class="result-card-top">
-            <div class="result-title">Web-Based Inventory Management System with Predictive Analytics for Small Businesses in Daanbantayan</div>
+            <h2 class="result-title">Web-Based Inventory Management System with Predictive Analytics for Small Businesses in Daanbantayan</h2>
             <span class="result-year">2023</span>
           </div>
           <div class="result-meta">
@@ -174,19 +251,22 @@
             <span class="tag">Predictive Analytics</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn">☆ Save</button>
-            <button class="view-btn">View Details →</button>
+            <button class="save-btn ripple" aria-label="Save this project" aria-pressed="false">
+              <span aria-hidden="true">☆</span> Save
+            </button>
+            <button class="view-btn ripple" aria-label="View project details">View Details →</button>
           </div>
-        </div>
+        </article>
 
       </div>
     </div>
+    </main>
   </div>
 
   <!-- =====================
        DASHBOARD VIEW
        ===================== -->
-  <div class="view" id="view-dashboard">
+  <div class="view" id="view-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
     <div class="dash-header">
       <div>
         <div class="dash-welcome">Welcome back, <span>Juan dela Cruz</span> 👋</div>
@@ -308,7 +388,7 @@
   <!-- =====================
        DETAIL VIEW
        ===================== -->
-  <div class="view" id="view-detail">
+  <div class="view" id="view-detail" role="tabpanel" aria-labelledby="tab-detail">
     <div style="margin-bottom:16px">
       <button class="btn btn-outline" style="font-size:12px;padding:5px 12px" onclick="switchView('landing')">← Back to Search</button>
     </div>
@@ -401,7 +481,7 @@
   <!-- =====================
        CHATBOT VIEW
        ===================== -->
-  <div class="view" id="view-chatbot">
+  <div class="view" id="view-chatbot" role="tabpanel" aria-labelledby="tab-chatbot">
     <div style="max-width:560px;margin:0 auto">
       <div style="text-align:center;margin-bottom:24px">
         <div style="font-size:18px;font-weight:500;color:var(--text-primary);margin-bottom:4px">AI Chatbot Assistant</div>
@@ -415,8 +495,11 @@
             <div class="chat-head-status">● Online — CTU Repository AI</div>
           </div>
         </div>
-        <div class="chat-messages" id="inline-chat-messages">
+        <div class="chat-messages" id="inline-chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
           <div class="msg msg-bot">Hi! I'm your Kapstone Assistant 👋 I can help you find research, navigate the system, or summarize trends. What do you need?</div>
+          <div class="typing-indicator" id="typing-indicator" style="display:none;" aria-label="Assistant is typing">
+            <span></span><span></span><span></span>
+          </div>
         </div>
         <div class="chat-suggestions" id="inline-suggestions">
           <button class="suggestion-chip" onclick="sendSuggestion(this,'How do I upload my abstract?')">How do I upload my abstract?</button>
@@ -468,6 +551,6 @@
   </div>
 </div>
 
-<script src="js/app.js"></script>
+<script src="js/app-enhanced.js"></script>
 </body>
 </html>
