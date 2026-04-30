@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="CTU Capstone Repository - Search and explore capstone projects from CTU Daanbantayan Campus with AI-powered search" />
+  <meta name="description" content="CTU Daanbantayan Campus AI-Integrated Capstone Repository - Search and explore thousands of research projects">
   <title>CTU Capstone Repository — AI-Integrated Metadata Repository</title>
-  
-  <!-- Preconnect for performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
 
@@ -24,64 +21,39 @@
        ===================== -->
   <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav-brand">
-      <div class="nav-logo" aria-hidden="true">CTU</div>
+      <img src="THE_LOGO.png" alt="RECAP System Logo" class="nav-logo-img" />
       <div>
         <div class="nav-title">RECAP</div>
         <div class="nav-subtitle">Online Repository for Capstone Projects</div>
       </div>
     </div>
     <div class="nav-actions">
-      <button class="btn btn-ghost btn-about" aria-label="About RECAP">About</button>
-      
-      <!-- Dark Mode Toggle -->
-      <button class="btn btn-ghost btn-icon" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-        <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
+      <button class="btn btn-ghost btn-about" aria-label="About CTU RECAP">About</button>
+      <button 
+        id="theme-toggle" 
+        class="btn btn-ghost theme-toggle" 
+        aria-label="Toggle dark mode"
+        title="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
       </button>
-
-      <!-- Logged-out state -->
-      <button class="btn btn-ghost" id="nav-register-btn" onclick="openAuthModal('register')">Sign Up</button>
-      <button class="btn btn-orange" id="nav-login-btn" onclick="openAuthModal('login')">Login</button>
-
-      <!-- Logged-in state (hidden until auth resolves) -->
-      <div class="nav-user-info" id="nav-user-info">
-        <div class="nav-user-avatar" id="nav-user-avatar" aria-hidden="true">U</div>
-        <span class="nav-user-name" id="nav-user-name">User</span>
-        <button class="btn-logout" onclick="handleLogout()" aria-label="Logout">Logout</button>
-      </div>
+      <button class="btn btn-orange" data-action="show-login" aria-label="Login to dashboard">Login</button>
     </div>
   </nav>
 
   <!-- =====================
        PAGE TABS
        ===================== -->
-  <div class="page-tabs" role="tablist" aria-label="Main sections">
-    <button class="tab active" role="tab" aria-selected="true" aria-controls="view-landing" onclick="switchView('landing')" tabindex="0">
-      <span class="tab-indicator"></span>
+  <div class="page-tabs" role="tablist" aria-label="Page navigation">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="view-landing" data-view="landing" tabindex="0">
       Search / Landing
     </button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="view-dashboard" onclick="switchView('dashboard')" tabindex="-1">
-      <span class="tab-indicator"></span>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-dashboard" data-view="dashboard" tabindex="-1">
       User Dashboard
     </button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="view-detail" onclick="switchView('detail')" tabindex="-1">
-      <span class="tab-indicator"></span>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-detail" data-view="detail" tabindex="-1">
       Project Detail
     </button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="view-chatbot" onclick="switchView('chatbot')" tabindex="-1">
-      <span class="tab-indicator"></span>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="view-chatbot" data-view="chatbot" tabindex="-1">
       AI Chatbot
     </button>
   </div>
@@ -89,129 +61,131 @@
   <!-- =====================
        LANDING VIEW
        ===================== -->
-  <main id="main-content" class="view active" id="view-landing" role="tabpanel" aria-labelledby="tab-landing">
+  <div class="view active" id="view-landing" role="tabpanel" aria-labelledby="tab-landing">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="#" aria-current="page">Home</a></li>
+      </ol>
+    </nav>
+    <main id="main-content">
     <div class="hero">
-      <h1>Find Your Next Research Breakthrough</h1>
-      <p>Search thousands of capstone projects from CTU Daanbantayan Campus</p>
-      <div class="search-wrap">
+      <h1 class="fade-in">Find Your Next Research Breakthrough</h1>
+      <p class="fade-in">Search thousands of capstone projects from CTU Daanbantayan Campus</p>
+      <div class="search-wrap fade-in">
         <input 
           class="search-bar" 
           type="search" 
-          id="main-search" 
+          id="main-search"
           placeholder="Search by title, author, keyword, or topic..." 
           aria-label="Search capstone projects"
-          autocomplete="off"
-        />
+          autocomplete="off" />
         <span class="search-icon" aria-hidden="true">⌕</span>
-        <div class="search-loading" id="search-loading" aria-hidden="true">
-          <div class="spinner"></div>
-        </div>
       </div>
-      <div class="search-toggle" role="switch" aria-checked="true" aria-label="Natural Language Search" tabindex="0" onclick="toggleNLSearch()" onkeydown="if(event.key==='Enter'||event.key===' ') toggleNLSearch()">
+      <div class="search-toggle fade-in" role="switch" aria-checked="true" aria-label="Natural Language Search" tabindex="0">
         <div class="toggle-pill"><div class="toggle-dot"></div></div>
         <span class="toggle-label">Natural Language Search</span>
-        <span class="toggle-badge">AI</span>
+        <span class="toggle-badge" aria-label="AI powered">AI</span>
       </div>
+    </div>
+    
+    <!-- Active Filters Display -->
+    <div class="active-filters" id="active-filters" role="region" aria-label="Active filters">
+      <!-- Dynamically populated filter chips -->
     </div>
 
     <div class="content-grid">
 
       <!-- Sidebar Filters -->
       <aside class="sidebar" role="complementary" aria-label="Search filters">
-        <div class="sidebar-header">
-          <h3>Filters</h3>
-          <button class="btn-clear-filters" onclick="clearAllFilters()" aria-label="Clear all filters">Clear all</button>
-        </div>
-        
-        <!-- Active Filters Chips -->
-        <div class="active-filters" id="active-filters" role="status" aria-live="polite" aria-atomic="true"></div>
+        <h3>Filters</h3>
 
         <div class="filter-section">
-          <button class="filter-title" aria-expanded="true" aria-controls="filter-year" onclick="toggleFilterSection(this)">
-            Year <span class="filter-chevron" aria-hidden="true">▼</span>
-          </button>
-          <div class="filter-content" id="filter-year">
-            <div class="filter-item"><input type="checkbox" id="y1" checked onchange="updateFilters()"><label for="y1">2024</label><span class="filter-count" aria-label="42 results">42</span></div>
-            <div class="filter-item"><input type="checkbox" id="y2" onchange="updateFilters()"><label for="y2">2023</label><span class="filter-count" aria-label="38 results">38</span></div>
-            <div class="filter-item"><input type="checkbox" id="y3" onchange="updateFilters()"><label for="y3">2022</label><span class="filter-count" aria-label="31 results">31</span></div>
-            <div class="filter-item"><input type="checkbox" id="y4" onchange="updateFilters()"><label for="y4">2021</label><span class="filter-count" aria-label="24 results">24</span></div>
+          <div class="filter-title" role="button" tabindex="0" aria-expanded="true" data-filter-toggle>
+            Year <span class="filter-arrow" aria-hidden="true">▼</span>
+          </div>
+          <div class="filter-content">
+            <div class="filter-item">
+              <input type="checkbox" id="y1" checked class="filter-checkbox" aria-label="Filter by year 2024">
+              <label for="y1">2024</label>
+              <span class="filter-count" aria-label="42 projects">42</span>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="y2" class="filter-checkbox" aria-label="Filter by year 2023">
+              <label for="y2">2023</label>
+              <span class="filter-count" aria-label="38 projects">38</span>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="y3" class="filter-checkbox" aria-label="Filter by year 2022">
+              <label for="y3">2022</label>
+              <span class="filter-count" aria-label="31 projects">31</span>
+            </div>
+            <div class="filter-item">
+              <input type="checkbox" id="y4" class="filter-checkbox" aria-label="Filter by year 2021">
+              <label for="y4">2021</label>
+              <span class="filter-count" aria-label="24 projects">24</span>
+            </div>
           </div>
         </div>
 
         <div class="filter-section">
-          <button class="filter-title" aria-expanded="true" aria-controls="filter-program" onclick="toggleFilterSection(this)">
-            Program <span class="filter-chevron" aria-hidden="true">▼</span>
-          </button>
-          <div class="filter-content" id="filter-program">
-            <div class="filter-item"><input type="checkbox" id="p1" checked onchange="updateFilters()"><label for="p1">BSIT</label><span class="filter-count" aria-label="58 results">58</span></div>
-            <div class="filter-item"><input type="checkbox" id="p2" onchange="updateFilters()"><label for="p2">BSCS</label><span class="filter-count" aria-label="24 results">24</span></div>
-            <div class="filter-item"><input type="checkbox" id="p3" onchange="updateFilters()"><label for="p3">BSED</label><span class="filter-count" aria-label="19 results">19</span></div>
-            <div class="filter-item"><input type="checkbox" id="p4" onchange="updateFilters()"><label for="p4">BSAgriBusiness</label><span class="filter-count" aria-label="12 results">12</span></div>
-          </div>
+          <div class="filter-title">Program <span class="text-xs text-hint">▼</span></div>
+          <div class="filter-item"><input type="checkbox" id="p1" checked><label for="p1">BSIT</label><span class="filter-count">58</span></div>
+          <div class="filter-item"><input type="checkbox" id="p2"><label for="p2">BSCS</label><span class="filter-count">24</span></div>
+          <div class="filter-item"><input type="checkbox" id="p3"><label for="p3">BSED</label><span class="filter-count">19</span></div>
+          <div class="filter-item"><input type="checkbox" id="p4"><label for="p4">BSAgriBusiness</label><span class="filter-count">12</span></div>
         </div>
 
         <div class="filter-section">
-          <button class="filter-title" aria-expanded="true" aria-controls="filter-topic" onclick="toggleFilterSection(this)">
-            Research Topic <span class="filter-chevron" aria-hidden="true">▼</span>
-          </button>
-          <div class="filter-content" id="filter-topic">
-            <div class="filter-item"><input type="checkbox" id="t1" checked onchange="updateFilters()"><label for="t1">Machine Learning</label></div>
-            <div class="filter-item"><input type="checkbox" id="t2" onchange="updateFilters()"><label for="t2">IoT / Hardware</label></div>
-            <div class="filter-item"><input type="checkbox" id="t3" onchange="updateFilters()"><label for="t3">Web Development</label></div>
-            <div class="filter-item"><input type="checkbox" id="t4" onchange="updateFilters()"><label for="t4">Mobile Apps</label></div>
-            <div class="filter-item"><input type="checkbox" id="t5" onchange="updateFilters()"><label for="t5">Data Analytics</label></div>
-          </div>
+          <div class="filter-title">Research Topic <span class="text-xs text-hint">▼</span></div>
+          <div class="filter-item"><input type="checkbox" id="t1" checked><label for="t1">Machine Learning</label></div>
+          <div class="filter-item"><input type="checkbox" id="t2"><label for="t2">IoT / Hardware</label></div>
+          <div class="filter-item"><input type="checkbox" id="t3"><label for="t3">Web Development</label></div>
+          <div class="filter-item"><input type="checkbox" id="t4"><label for="t4">Mobile Apps</label></div>
+          <div class="filter-item"><input type="checkbox" id="t5"><label for="t5">Data Analytics</label></div>
         </div>
 
         <div class="filter-section">
-          <label for="keyword-input" class="filter-title-label">Keywords</label>
-          <input 
-            type="text" 
-            id="keyword-input" 
-            class="filter-keyword-input" 
-            placeholder="e.g. Arduino, React..." 
-            aria-label="Filter by keywords"
-            oninput="debouncedKeywordSearch(this.value)"
+          <div class="filter-title">Keywords</div>
+          <input
+            type="text"
+            class="filter-keyword-input"
+            placeholder="e.g. Arduino, React..."
           />
         </div>
+
+        <button class="btn btn-blue ripple w-full mt-1 text-md" aria-label="Apply selected filters">
+          Apply Filters
+        </button>
+        <button class="btn btn-outline ripple w-full mt-2 text-md" aria-label="Clear all filters">
+          Clear All
+        </button>
       </aside>
 
       <!-- Search Results -->
-      <div>
-        <!-- Breadcrumb -->
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <ol>
-            <li><a href="#" onclick="return false">Home</a></li>
-            <li aria-current="page">Search Results</li>
-          </ol>
-        </nav>
-        
+      <div role="region" aria-label="Search results">
         <div class="results-header">
-          <span class="results-count" role="status" aria-live="polite" aria-atomic="true">
-            Showing <strong id="results-total">42</strong> results for "<span id="results-query">machine learning BSIT 2024</span>"
+          <span class="results-count" role="status" aria-live="polite">
+            Showing <strong>42</strong> results for "machine learning BSIT 2024"
           </span>
-          <select class="sort-select" aria-label="Sort results" onchange="sortResults(this.value)">
-            <option value="relevant">Sort: Most Relevant</option>
-            <option value="newest">Sort: Newest First</option>
-            <option value="oldest">Sort: Oldest First</option>
+          <select class="sort-select" aria-label="Sort results">
+            <option>Sort: Most Relevant</option>
+            <option>Sort: Newest First</option>
+            <option>Sort: Oldest First</option>
           </select>
         </div>
         
-        <!-- Loading Skeleton -->
-        <div class="loading-skeleton" id="loading-skeleton" style="display: none;" aria-hidden="true">
+        <!-- Loading Skeleton (hidden by default) -->
+        <div class="loading-skeleton hidden" id="loading-skeleton" aria-hidden="true">
           <div class="skeleton-card"></div>
           <div class="skeleton-card"></div>
           <div class="skeleton-card"></div>
         </div>
-        
-        <!-- Results Container -->
-        <div id="results-container">
 
         <!-- Result Card 1 -->
-        <article class="result-card" onclick="switchView('detail')" onkeydown="if(event.key==='Enter') switchView('detail')" tabindex="0" role="button" aria-label="View project: Smart Attendance Monitoring System">
+        <article class="result-card card-hover" data-view="detail" role="article" tabindex="0">
           <div class="result-card-top">
-            <div class="result-title">Smart Attendance Monitoring System Using Facial Recognition with Machine Learning for CTU Daanbantayan Campus</div>
-            <span class="result-year">2024</span>
+            <h2 class="result-title">Smart Attendance Monitoring System Using Facial Recognition with Machine Learning for CTU Daanbantayan Campus</h2>
+            <span class="result-year" aria-label="Published in 2024">2024</span>
           </div>
           <div class="result-meta">
             <span>👤 Reyes, A. · Santos, M. · Dela Cruz, J.</span>
@@ -225,19 +199,19 @@
             <span class="tag tag-orange">Machine Learning</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn ripple" onclick="event.stopPropagation(); toggleSave(this)" aria-label="Save project">
-              <span class="save-icon">☆</span> Save
+            <button class="save-btn ripple" aria-label="Save this project" aria-pressed="false">
+              <span aria-hidden="true">☆</span> Save
             </button>
-            <button class="view-btn ripple" onclick="event.stopPropagation(); switchView('detail')" aria-label="View project details">
+            <button class="view-btn ripple" data-view="detail" aria-label="View project details">
               View Details →
             </button>
           </div>
         </article>
 
         <!-- Result Card 2 -->
-        <article class="result-card" tabindex="0" role="button" aria-label="View project: IoT-Based Soil Moisture Detection System">
+        <article class="result-card card-hover" role="article" tabindex="0">
           <div class="result-card-top">
-            <div class="result-title">IoT-Based Soil Moisture Detection System Using Arduino for Precision Agriculture in Coastal Communities</div>
+            <h2 class="result-title">IoT-Based Soil Moisture Detection System Using Arduino for Precision Agriculture in Coastal Communities</h2>
             <span class="result-year">2024</span>
           </div>
           <div class="result-meta">
@@ -252,19 +226,17 @@
             <span class="tag tag-orange">Hardware</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn ripple" onclick="event.stopPropagation(); toggleSave(this)" aria-label="Save project">
-              <span class="save-icon">☆</span> Save
+            <button class="save-btn ripple" aria-label="Save this project" aria-pressed="false">
+              <span aria-hidden="true">☆</span> Save
             </button>
-            <button class="view-btn ripple" onclick="event.stopPropagation()" aria-label="View project details">
-              View Details →
-            </button>
+            <button class="view-btn ripple" aria-label="View project details">View Details →</button>
           </div>
         </article>
 
         <!-- Result Card 3 -->
-        <article class="result-card" tabindex="0" role="button" aria-label="View project: Web-Based Inventory Management System">
+        <article class="result-card card-hover" role="article" tabindex="0">
           <div class="result-card-top">
-            <div class="result-title">Web-Based Inventory Management System with Predictive Analytics for Small Businesses in Daanbantayan</div>
+            <h2 class="result-title">Web-Based Inventory Management System with Predictive Analytics for Small Businesses in Daanbantayan</h2>
             <span class="result-year">2023</span>
           </div>
           <div class="result-meta">
@@ -278,45 +250,34 @@
             <span class="tag">Predictive Analytics</span>
           </div>
           <div class="result-actions">
-            <button class="save-btn ripple" onclick="event.stopPropagation(); toggleSave(this)" aria-label="Save project">
-              <span class="save-icon">☆</span> Save
+            <button class="save-btn ripple" aria-label="Save this project" aria-pressed="false">
+              <span aria-hidden="true">☆</span> Save
             </button>
-            <button class="view-btn ripple" onclick="event.stopPropagation()" aria-label="View project details">
-              View Details →
-            </button>
+            <button class="view-btn ripple" aria-label="View project details">View Details →</button>
           </div>
         </article>
-        
-        </div><!-- #results-container -->
-        
-        <!-- Empty State -->
-        <div class="empty-state" id="empty-state" style="display: none;">
-          <div class="empty-icon" aria-hidden="true">🔍</div>
-          <h3>No results found</h3>
-          <p>Try adjusting your filters or search terms</p>
-          <button class="btn btn-blue ripple" onclick="clearAllFilters()">Clear all filters</button>
-        </div>
 
       </div>
     </div>
-  </main>
+    </main>
+  </div>
 
   <!-- =====================
        DASHBOARD VIEW
        ===================== -->
-  <div class="view" id="view-dashboard">
+  <div class="view" id="view-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
     <div class="dash-header">
       <div>
         <div class="dash-welcome">Welcome back, <span>Juan dela Cruz</span> 👋</div>
-        <div class="dash-last-login">Last login: April 26, 2026</div>
+        <div class="text-md text-secondary mt-1">Last login: April 26, 2026</div>
       </div>
       <span class="role-badge">Student — BSIT 3A</span>
     </div>
 
     <div class="role-tabs">
-      <div class="role-tab active" onclick="switchRole(this,'student')">Student View</div>
-      <div class="role-tab" onclick="switchRole(this,'adviser')">Adviser View</div>
-      <div class="role-tab" onclick="switchRole(this,'librarian')">Librarian View</div>
+      <div class="role-tab active" data-role="student">Student View</div>
+      <div class="role-tab" data-role="adviser">Adviser View</div>
+      <div class="role-tab" data-role="librarian">Librarian View</div>
     </div>
 
     <!-- Student Panel -->
@@ -326,7 +287,7 @@
         <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Recent Searches</div></div>
         <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Cited Works</div></div>
       </div>
-      <div class="saved-section-title">My Saved Research</div>
+      <div class="text-md font-medium text-primary mb-3">My Saved Research</div>
       <div class="saved-grid">
         <div class="saved-card">
           <div class="saved-title">Smart Attendance Monitoring System Using Facial Recognition</div>
@@ -352,32 +313,32 @@
     </div>
 
     <!-- Adviser Panel -->
-    <div id="dash-adviser" style="display:none">
+    <div id="dash-adviser" class="hidden">
       <div class="adviser-panel">
-        <div class="adviser-panel-title">Title Originality Validator</div>
-        <div class="adviser-panel-desc">Paste a proposed capstone title to check for similarity against existing projects.</div>
+        <div class="text-xl font-medium text-primary mb-1">Title Originality Validator</div>
+        <div class="text-md text-secondary mb-4">Paste a proposed capstone title to check for similarity against existing projects.</div>
         <input
           class="validation-input"
           type="text"
           placeholder="Enter proposed project title..."
           value="Machine Learning-Based Crop Disease Detection Using Image Processing for Farmers in Northern Cebu"
         />
-        <button class="btn btn-blue" onclick="runValidation()">Check Originality →</button>
+        <button class="btn btn-blue" data-action="validate">Check Originality →</button>
         <div class="val-result" id="val-result">
-          <div class="val-result-title">Similarity Results</div>
+          <div class="text-md font-medium text-primary mb-2">Similarity Results</div>
           <div class="val-row">
-            <span class="val-row-label">Plant Disease Detection Using CNN — Reyes, 2024</span>
+            <span class="flex-1 text-base text-secondary">Plant Disease Detection Using CNN — Reyes, 2024</span>
             <span class="val-sim sim-med">68% match</span>
           </div>
           <div class="val-row">
-            <span class="val-row-label">Image-Based Crop Monitoring System — Santos, 2023</span>
+            <span class="flex-1 text-base text-secondary">Image-Based Crop Monitoring System — Santos, 2023</span>
             <span class="val-sim sim-med">54% match</span>
           </div>
           <div class="val-row">
-            <span class="val-row-label">Smart Agriculture System Using ML — dela Cruz, 2022</span>
+            <span class="flex-1 text-base text-secondary">Smart Agriculture System Using ML — dela Cruz, 2022</span>
             <span class="val-sim sim-low">31% match</span>
           </div>
-          <div class="val-warning">
+          <div class="mt-3 p-2 bg-orange-light rounded-md text-base text-orange">
             ⚠ Moderate overlap detected. Advise student to differentiate scope or methodology from existing works.
           </div>
         </div>
@@ -385,38 +346,38 @@
     </div>
 
     <!-- Librarian Panel -->
-    <div id="dash-librarian" style="display:none">
-      <div class="librarian-stats">
+    <div id="dash-librarian" class="hidden">
+      <div class="dash-grid mb-5">
         <div class="stat-card"><div class="stat-num">248</div><div class="stat-label">Total Projects</div></div>
-        <div class="stat-card"><div class="stat-num stat-num-orange">7</div><div class="stat-label">Pending Upload</div></div>
-        <div class="stat-card"><div class="stat-num stat-num-green">12</div><div class="stat-label">This Month Added</div></div>
+        <div class="stat-card"><div class="stat-num text-orange">7</div><div class="stat-label">Pending Upload</div></div>
+        <div class="stat-card"><div class="stat-num text-green">12</div><div class="stat-label">This Month Added</div></div>
       </div>
-      <div class="uploads-card">
-        <div class="uploads-card-header">
-          <div class="uploads-card-title">Recent Uploads</div>
-          <button class="btn btn-orange btn-upload">+ Upload Metadata</button>
+      <div class="bg-surface rounded-lg border p-5">
+        <div class="flex justify-between items-center mb-4">
+          <div class="text-lg font-medium">Recent Uploads</div>
+          <button class="btn btn-orange text-base p-2">+ Upload Metadata</button>
         </div>
-        <div class="uploads-table-head">
+        <div class="librarian-table-header">
           <span>Title</span><span>Program</span><span>Year</span><span>Status</span>
         </div>
-        <div class="uploads-table-body">
-          <div class="upload-row upload-row-alt">
-            <span class="upload-title">Smart Attendance Monitoring System...</span>
-            <span class="upload-program">BSIT</span>
-            <span class="upload-year">2024</span>
-            <span class="upload-status-published">Published</span>
+        <div class="flex-col gap-1">
+          <div class="librarian-table-row librarian-table-row-active">
+            <span class="text-primary">Smart Attendance Monitoring System...</span>
+            <span class="text-secondary">BSIT</span>
+            <span class="text-secondary">2024</span>
+            <span class="status-published">Published</span>
           </div>
-          <div class="upload-row">
-            <span class="upload-title">IoT-Based Soil Moisture Detection...</span>
-            <span class="upload-program">BSIT</span>
-            <span class="upload-year">2024</span>
-            <span class="upload-status-published">Published</span>
+          <div class="librarian-table-row">
+            <span class="text-primary">IoT-Based Soil Moisture Detection...</span>
+            <span class="text-secondary">BSIT</span>
+            <span class="text-secondary">2024</span>
+            <span class="status-published">Published</span>
           </div>
-          <div class="upload-row upload-row-warn">
-            <span class="upload-title">Automated Grading System NLP...</span>
-            <span class="upload-program">BSIT</span>
-            <span class="upload-year">2024</span>
-            <span class="upload-status-pending">Pending</span>
+          <div class="librarian-table-row librarian-table-row-pending">
+            <span class="text-primary">Automated Grading System NLP...</span>
+            <span class="text-secondary">BSIT</span>
+            <span class="text-secondary">2024</span>
+            <span class="status-pending">Pending</span>
           </div>
         </div>
       </div>
@@ -426,9 +387,9 @@
   <!-- =====================
        DETAIL VIEW
        ===================== -->
-  <div class="view" id="view-detail">
-    <div class="detail-back">
-      <button class="btn btn-outline btn-back" onclick="switchView('landing')">← Back to Search</button>
+  <div class="view" id="view-detail" role="tabpanel" aria-labelledby="tab-detail">
+    <div class="mb-4">
+      <button class="btn btn-outline text-base p-1" data-view="landing">← Back to Search</button>
     </div>
     <div class="detail-grid">
 
@@ -439,22 +400,22 @@
         <div class="detail-authors">Reyes, Angelo M. · Santos, Maria C. · Dela Cruz, Jose R. — Adviser: Prof. Elena Villanueva</div>
         <div class="detail-divider"></div>
 
-        <div class="detail-section">
+        <div class="mb-5">
           <div class="section-label">Abstract</div>
           <div class="section-content">This study developed and evaluated a smart attendance monitoring system utilizing convolutional neural network-based facial recognition to automate student tracking at CTU Daanbantayan Campus. The system integrates a real-time camera feed processed by a Python-OpenCV pipeline, achieving 94.3% accuracy across varied lighting conditions. Testing with 280 enrolled student samples demonstrated a 78% reduction in manual recording time compared to traditional roll-call methods.</div>
         </div>
 
-        <div class="detail-section">
+        <div class="mb-5">
           <div class="section-label">Methodology</div>
           <div class="section-content">The study employed a developmental research methodology. Data collection involved a structured survey of 45 faculty members. The facial recognition model was trained using a dataset of 14,000 student facial images using transfer learning on a ResNet-50 architecture. System evaluation used ISO 9241 usability standards.</div>
         </div>
 
-        <div class="detail-section">
+        <div class="mb-5">
           <div class="section-label">Key Findings</div>
           <div class="section-content">The system achieved 94.3% recognition accuracy, 78% reduction in attendance recording time, and an overall System Usability Scale (SUS) score of 84.2 (Grade A). Faculty reported significantly higher satisfaction compared to manual methods.</div>
         </div>
 
-        <div class="detail-section-last">
+        <div class="mb-0">
           <div class="section-label">Suggested Future Research</div>
           <div class="future-research-box">
             <div class="future-item"><div class="future-dot"></div><span>Extend the system to support mask-wearing detection for health compliance monitoring in post-pandemic settings.</span></div>
@@ -469,19 +430,19 @@
         <div class="fair-card">
           <h3>FAIR Principles</h3>
           <div class="fair-row">
-            <div class="fair-dot fair-dot-blue"></div>
+            <div class="fair-dot" style="background:#1A4F8A"></div>
             <div><div class="fair-label">Findable</div><div class="fair-sub">Indexed with full metadata</div></div>
           </div>
           <div class="fair-row">
-            <div class="fair-dot fair-dot-green"></div>
+            <div class="fair-dot" style="background:#27ae60"></div>
             <div><div class="fair-label">Accessible</div><div class="fair-sub">Metadata open to public</div></div>
           </div>
           <div class="fair-row">
-            <div class="fair-dot fair-dot-orange"></div>
+            <div class="fair-dot" style="background:#E87722"></div>
             <div><div class="fair-label">Interoperable</div><div class="fair-sub">Standard metadata schema</div></div>
           </div>
           <div class="fair-row">
-            <div class="fair-dot fair-dot-purple"></div>
+            <div class="fair-dot" style="background:#8e44ad"></div>
             <div><div class="fair-label">Reusable</div><div class="fair-sub">Clear attribution info</div></div>
           </div>
           <button class="cite-btn">📋 Cite This Project</button>
@@ -505,10 +466,10 @@
 
         <div class="fair-card">
           <h3>Project Info</h3>
-          <div class="project-info-list">
+          <div class="flex-col gap-2">
             <div class="project-info-row"><span class="project-info-label">Year</span><span class="project-info-value">2024</span></div>
             <div class="project-info-row"><span class="project-info-label">Program</span><span class="project-info-value">BSIT</span></div>
-            <div class="project-info-row"><span class="project-info-label">Full file</span><span class="project-info-restrict">Restricted (Library only)</span></div>
+            <div class="project-info-row"><span class="project-info-label">Full file</span><span class="text-hint italic">Restricted (Library only)</span></div>
           </div>
         </div>
       </div>
@@ -519,13 +480,13 @@
   <!-- =====================
        CHATBOT VIEW
        ===================== -->
-  <div class="view" id="view-chatbot">
-    <div class="chatbot-view-wrap">
-      <div class="chatbot-view-header">
-        <div class="chatbot-view-title">AI Chatbot Assistant</div>
-        <div class="chatbot-view-desc">The floating button (bottom-right) is always available across all pages</div>
+  <div class="view" id="view-chatbot" role="tabpanel" aria-labelledby="tab-chatbot">
+    <div class="max-w-560 mx-auto">
+      <div class="text-center mb-6">
+        <div class="text-2xl font-medium text-primary mb-1">AI Chatbot Assistant</div>
+        <div class="text-md text-secondary">The floating button (bottom-right) is always available across all pages</div>
       </div>
-      <div class="chatbot-inline-card">
+      <div class="bg-surface rounded-lg border overflow-hidden">
         <div class="chat-head">
           <div class="chat-avatar">AI</div>
           <div class="chat-head-info">
@@ -533,27 +494,31 @@
             <div class="chat-head-status">● Online — CTU Repository AI</div>
           </div>
         </div>
-        <div class="chat-messages" id="inline-chat-messages">
+        <div class="chat-messages" id="inline-chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
           <div class="msg msg-bot">Hi! I'm your Kapstone Assistant 👋 I can help you find research, navigate the system, or summarize trends. What do you need?</div>
+          <div class="typing-indicator hidden" id="typing-indicator" aria-label="Assistant is typing">
+            <span></span><span></span><span></span>
+          </div>
         </div>
         <div class="chat-suggestions" id="inline-suggestions">
-          <button class="suggestion-chip" onclick="sendSuggestion(this,'How do I upload my abstract?')">How do I upload my abstract?</button>
-          <button class="suggestion-chip" onclick="sendSuggestion(this,'Show me IoT projects from 2024 using Arduino')">Show me IoT projects from 2024 using Arduino</button>
-          <button class="suggestion-chip" onclick="sendSuggestion(this,'Summarize research trends in 2025')">Summarize research trends in 2025</button>
+          <button class="suggestion-chip" data-suggestion="How do I upload my abstract?">How do I upload my abstract?</button>
+          <button class="suggestion-chip" data-suggestion="Show me IoT projects from 2024 using Arduino">Show me IoT projects from 2024 using Arduino</button>
+          <button class="suggestion-chip" data-suggestion="Summarize research trends in 2025">Summarize research trends in 2025</button>
         </div>
         <div class="chat-input-row">
           <input class="chat-input" type="text" id="inline-chat-input" placeholder="Ask anything about the repository..." />
-          <button class="chat-send" onclick="sendInlineMessage()">➤</button>
-        </div><!-- /.chatbot-inline-card -->
-    </div><!-- /.chatbot-view-wrap -->
-  </div><!-- /#view-chatbot -->
+          <button class="chat-send" data-action="send-inline">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /.app -->
 
 <!-- =====================
      FLOATING CHATBOT FAB
      ===================== -->
-<button class="chat-fab" id="chat-fab" onclick="toggleChat()" aria-label="Open chat assistant">
+<button class="chat-fab" id="chat-fab" data-action="toggle-chat" aria-label="Open chat assistant">
   <svg class="chat-fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
   </svg>
@@ -566,7 +531,7 @@
       <div class="chat-head-name">Kapstone Assistant</div>
       <div class="chat-head-status">● Online</div>
     </div>
-    <button class="chat-close" onclick="toggleChat()" aria-label="Close chat">✕</button>
+    <button class="chat-close" data-action="toggle-chat" aria-label="Close chat">✕</button>
   </div>
   <div class="chat-messages" id="chat-messages">
     <div class="msg msg-bot">Hi! I'm here to help you navigate the CTU Capstone Repository. Ask me anything!</div>
@@ -579,140 +544,108 @@
       type="text"
       id="chat-input"
       placeholder="Type a message..."
-      onkeydown="if(event.key==='Enter') sendChat()"
+      data-enter-send
     />
-    <button class="chat-send" onclick="sendChat()" aria-label="Send message">➤</button>
+    <button class="chat-send" data-action="send-chat" aria-label="Send message">➤</button>
   </div>
 </div>
 
 <!-- =====================
      LOGIN MODAL
      ===================== -->
-<div class="auth-overlay" id="login-modal" onclick="if(event.target===this) closeLoginModal()">
-  <div class="auth-modal" role="dialog" aria-modal="true" aria-label="Login">
-
-    <div class="auth-modal-header">
-      <div class="auth-modal-brand">
-        <div class="auth-modal-logo">CTU</div>
-        <div>
-          <div class="auth-modal-title">RECAP</div>
-          <div class="auth-modal-subtitle">CTU Daanbantayan Campus Library</div>
-        </div>
-      </div>
-      <div class="auth-modal-header-row">
-        <span class="auth-modal-heading">Welcome back</span>
-        <button class="auth-modal-close" onclick="closeLoginModal()" aria-label="Close">✕</button>
-      </div>
+<div class="modal-overlay hidden" id="login-modal" role="dialog" aria-labelledby="login-title" aria-modal="true">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="login-title" class="modal-title">Login to CTU RECAP</h2>
+      <button class="modal-close" data-action="close-login" aria-label="Close login modal">✕</button>
     </div>
-
-    <div class="auth-modal-body">
-      <form id="form-login" onsubmit="handleLogin(event)" novalidate>
-        <div class="auth-error" role="alert"></div>
-
-        <div class="auth-field">
-          <label for="login-email">Email Address</label>
-          <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email" />
+    
+    <div class="modal-body">
+      <form id="login-form" data-form="login">
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email or Student ID</label>
+          <input 
+            type="text" 
+            id="login-email" 
+            class="form-input" 
+            placeholder="student@ctu.edu.ph or 2021-12345"
+            required
+            autocomplete="username"
+          />
+          <span class="form-error hidden" id="email-error">Please enter a valid email or student ID</span>
         </div>
-
-        <div class="auth-field">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password" />
+        
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <div class="password-input-wrapper">
+            <input 
+              type="password" 
+              id="login-password" 
+              class="form-input" 
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password"
+            />
+            <button 
+              type="button" 
+              class="password-toggle" 
+              data-action="toggle-password"
+              aria-label="Toggle password visibility">
+              <span class="password-icon">👁️</span>
+            </button>
+          </div>
+          <span class="form-error hidden" id="password-error">Password is required</span>
         </div>
-
-        <button type="submit" class="auth-submit" id="btn-login" data-label="Login to RECAP">
-          Login to RECAP
-        </button>
-
-        <div class="auth-footer">
-          Don't have an account?
-          <a onclick="closeLoginModal(); openRegisterModal()">Sign up here</a>
+        
+        <div class="form-group flex justify-between items-center">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember-me" class="form-checkbox" />
+            <span class="text-md">Remember me</span>
+          </label>
+          <a href="#" class="text-md text-blue" data-action="forgot-password">Forgot password?</a>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn btn-blue w-full ripple" id="login-submit">
+            <span class="btn-text">Login</span>
+            <span class="btn-spinner hidden">
+              <span class="spinner"></span> Logging in...
+            </span>
+          </button>
+        </div>
+        
+        <div class="form-divider">
+          <span>or</span>
+        </div>
+        
+        <div class="form-group">
+          <button type="button" class="btn btn-outline w-full" data-action="demo-login">
+            <span>🎓</span> Demo Login (Student)
+          </button>
+        </div>
+        
+        <div class="text-center text-md text-secondary mt-4">
+          Don't have an account? <a href="#" class="text-blue font-medium" data-action="show-register">Register here</a>
         </div>
       </form>
+      
+      <!-- Success Message -->
+      <div class="login-success hidden" id="login-success">
+        <div class="success-icon">✓</div>
+        <h3 class="text-xl font-semibold text-primary mb-2">Login Successful!</h3>
+        <p class="text-md text-secondary mb-4">Redirecting to dashboard...</p>
+      </div>
     </div>
-
   </div>
 </div>
 
-<!-- =====================
-     REGISTER MODAL
-     ===================== -->
-<div class="auth-overlay" id="register-modal" onclick="if(event.target===this) closeRegisterModal()">
-  <div class="auth-modal" role="dialog" aria-modal="true" aria-label="Create Account">
-
-    <div class="auth-modal-header">
-      <div class="auth-modal-brand">
-        <div class="auth-modal-logo">CTU</div>
-        <div>
-          <div class="auth-modal-title">RECAP</div>
-          <div class="auth-modal-subtitle">CTU Daanbantayan Campus Library</div>
-        </div>
-      </div>
-      <div class="auth-modal-header-row">
-        <span class="auth-modal-heading">Create your account</span>
-        <button class="auth-modal-close" onclick="closeRegisterModal()" aria-label="Close">✕</button>
-      </div>
-    </div>
-
-    <div class="auth-modal-body">
-      <form id="form-register" onsubmit="handleRegister(event)" novalidate>
-        <div class="auth-error" role="alert"></div>
-
-        <div class="auth-field">
-          <label for="reg-name">Full Name</label>
-          <input type="text" id="reg-name" placeholder="e.g. Juan dela Cruz" required autocomplete="name" />
-        </div>
-
-        <div class="auth-field">
-          <label for="reg-email">Email Address</label>
-          <input type="email" id="reg-email" placeholder="you@example.com" required autocomplete="email" />
-        </div>
-
-        <div class="auth-row">
-          <div class="auth-field">
-            <label for="reg-role">Role</label>
-            <select id="reg-role" required>
-              <option value="" disabled selected>Select role</option>
-              <option value="student">Student</option>
-              <option value="adviser">Adviser</option>
-              <option value="librarian">Librarian</option>
-            </select>
-          </div>
-          <div class="auth-field">
-            <label for="reg-program">Program <span class="field-hint">(optional)</span></label>
-            <input type="text" id="reg-program" placeholder="e.g. BSIT" autocomplete="off" />
-          </div>
-        </div>
-
-        <div class="auth-field">
-          <label for="reg-password">Password</label>
-          <input type="password" id="reg-password" placeholder="At least 6 characters" required autocomplete="new-password" />
-        </div>
-
-        <div class="auth-field">
-          <label for="reg-confirm">Confirm Password</label>
-          <input type="password" id="reg-confirm" placeholder="Repeat your password" required autocomplete="new-password" />
-        </div>
-
-        <button type="submit" class="auth-submit" id="btn-register" data-label="Create Account">
-          Create Account
-        </button>
-
-        <div class="auth-footer">
-          Already have an account?
-          <a onclick="closeRegisterModal(); openLoginModal()">Login here</a>
-        </div>
-      </form>
-    </div>
-
-  </div>
-</div>
-
-<!-- Firebase compat SDKs (must load before auth.js) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<script src="js/app.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/filters.js"></script>
+<script src="js/search.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

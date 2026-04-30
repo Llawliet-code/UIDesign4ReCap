@@ -1,0 +1,121 @@
+/**
+ * Layout CSS
+ * Grid layouts, flexbox, and structural styles
+ */
+
+/* =====================
+   MAIN APP LAYOUT
+   ===================== */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* =====================
+   CONTENT GRIDS
+   ===================== */
+.content-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* =====================
+   FLEX LAYOUTS
+   ===================== */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-gap-1 { gap: 4px; }
+.flex-gap-2 { gap: 8px; }
+.flex-gap-3 { gap: 12px; }
+.flex-gap-4 { gap: 16px; }
+
+/* =====================
+   SIDEBAR
+   ===================== */
+.sidebar {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  padding: 16px;
+  height: fit-content;
+  position: sticky;
+  top: 80px;
+}
+
+.detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =====================
+   RESPONSIVE LAYOUTS
+   ===================== */
+@media (max-width: 768px) {
+  .content-grid { 
+    grid-template-columns: 1fr; 
+  }
+  
+  .sidebar { 
+    display: none; 
+  }
+  
+  .detail-grid { 
+    grid-template-columns: 1fr; 
+  }
+  
+  .dash-grid { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  
+  .saved-grid { 
+    grid-template-columns: 1fr; 
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}

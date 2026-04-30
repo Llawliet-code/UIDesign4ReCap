@@ -1,0 +1,410 @@
+/**
+ * Authentication Module
+ * Handles login, logout, and user authentication
+ */
+
+const Auth = {
+  // Demo users for testing
+  demoUsers: {
+    'student@ctu.edu.ph': {
+      password: 'student123',
+      role: 'student',
+      name: 'Juan dela Cruz',
+      id: '2021-12345',
+      program: 'BSIT 3A'
+    },
+    '2021-12345': {
+      password: 'student123',
+      role: 'student',
+      name: 'Juan dela Cruz',
+      id: '2021-12345',
+      program: 'BSIT 3A'
+    },
+    'adviser@ctu.edu.ph': {
+      password: 'adviser123',
+      role: 'adviser',
+      name: 'Prof. Elena Villanueva',
+      id: 'ADV-001',
+      department: 'Computer Science'
+    },
+    'librarian@ctu.edu.ph': {
+      password: 'librarian123',
+      role: 'librarian',
+      name: 'Ms. Maria Santos',
+      id: 'LIB-001',
+      department: 'Library Services'
+    }
+  },
+
+  currentUser: null,
+
+  /**
+   * Show login modal
+   */
+  showLoginModal() {
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      
+      // Focus on email input
+      setTimeout(() => {
+        const emailInput = document.getElementById('login-email');
+        if (emailInput) emailInput.focus();
+      }, 100);
+    }
+  },
+
+  /**
+   * Close login modal
+   */
+  closeLoginModal() {
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      
+      // Reset form
+      this.resetForm();
+    }
+  },
+
+  /**
+   * Reset login form
+   */
+  resetForm() {
+    const form = document.getElementById('login-form');
+    if (form) {
+      form.reset();
+      
+      // Hide all errors
+      document.querySelectorAll('.form-error').forEach(error => {
+        error.classList.add('hidden');
+      });
+      
+      // Remove error states
+      document.querySelectorAll('.form-input').forEach(input => {
+        input.classList.remove('error');
+      });
+      
+      // Reset button state
+      this.setButtonState(false);
+      
+      // Hide success message
+      const successDiv = document.getElementById('login-success');
+      if (successDiv) successDiv.classList.add('hidden');
+      
+      // Show form
+      if (form) form.classList.remove('hidden');
+    }
+  },
+
+  /**
+   * Toggle password visibility
+   */
+  togglePassword() {
+    const passwordInput = document.getElementById('login-password');
+    const icon = document.querySelector('.password-icon');
+    
+    if (passwordInput && icon) {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+  },
+
+  /**
+   * Validate form inputs
+   */
+  validateForm(email, password) {
+    let isValid = true;
+    
+    // Validate email/student ID
+    const emailInput = document.getElementById('login-email');
+    const emailError = document.getElementById('email-error');
+    
+    if (!email || email.trim() === '') {
+      emailInput.classList.add('error');
+      emailError.textContent = 'Email or Student ID is required';
+      emailError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      emailInput.classList.remove('error');
+      emailError.classList.add('hidden');
+    }
+    
+    // Validate password
+    const passwordInput = document.getElementById('login-password');
+    const passwordError = document.getElementById('password-error');
+    
+    if (!password || password.trim() === '') {
+      passwordInput.classList.add('error');
+      passwordError.textContent = 'Password is required';
+      passwordError.classList.remove('hidden');
+      isValid = false;
+    } else if (password.length < 6) {
+      passwordInput.classList.add('error');
+      passwordError.textContent = 'Password must be at least 6 characters';
+      passwordError.classList.remove('hidden');
+      isValid = false;
+    } else {
+      passwordInput.classList.remove('error');
+      passwordError.classList.add('hidden');
+    }
+    
+    return isValid;
+  },
+
+  /**
+   * Set button loading state
+   */
+  setButtonState(loading) {
+    const button = document.getElementById('login-submit');
+    const btnText = button.querySelector('.btn-text');
+    const btnSpinner = button.querySelector('.btn-spinner');
+    
+    if (loading) {
+      button.disabled = true;
+      btnText.classList.add('hidden');
+      btnSpinner.classList.remove('hidden');
+    } else {
+      button.disabled = false;
+      btnText.classList.remove('hidden');
+      btnSpinner.classList.add('hidden');
+    }
+  },
+
+  /**
+   * Authenticate user
+   */
+  authenticate(email, password) {
+    // Check if user exists
+    const user = this.demoUsers[email.toLowerCase()];
+    
+    if (!user) {
+      return {
+        success: false,
+        message: 'Invalid email or student ID'
+      };
+    }
+    
+    // Check password
+    if (user.password !== password) {
+      return {
+        success: false,
+        message: 'Incorrect password'
+      };
+    }
+    
+    // Success
+    return {
+      success: true,
+      user: user
+    };
+  },
+
+  /**
+   * Handle login form submission
+   */
+  async handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const rememberMe = document.getElementById('remember-me').checked;
+    
+    // Validate form
+    if (!this.validateForm(email, password)) {
+      return;
+    }
+    
+    // Set loading state
+    this.setButtonState(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Authenticate
+    const result = this.authenticate(email, password);
+    
+    if (result.success) {
+      // Store user data
+      this.currentUser = result.user;
+      
+      // Save to localStorage if remember me is checked
+      if (rememberMe) {
+        localStorage.setItem('ctureap_user', JSON.stringify(result.user));
+      } else {
+        sessionStorage.setItem('ctureap_user', JSON.stringify(result.user));
+      }
+      
+      // Show success message
+      this.showSuccess();
+      
+      // Redirect to dashboard after 1.5 seconds
+      setTimeout(() => {
+        this.closeLoginModal();
+        if (typeof Navigation !== 'undefined') {
+          Navigation.switchView('dashboard');
+        }
+        this.updateUIForLoggedInUser();
+      }, 1500);
+      
+    } else {
+      // Show error
+      this.setButtonState(false);
+      const emailError = document.getElementById('email-error');
+      emailError.textContent = result.message;
+      emailError.classList.remove('hidden');
+      document.getElementById('login-email').classList.add('error');
+    }
+  },
+
+  /**
+   * Show success message
+   */
+  showSuccess() {
+    const form = document.getElementById('login-form');
+    const successDiv = document.getElementById('login-success');
+    
+    if (form && successDiv) {
+      form.classList.add('hidden');
+      successDiv.classList.remove('hidden');
+    }
+  },
+
+  /**
+   * Demo login (quick login for testing)
+   */
+  async demoLogin() {
+    // Auto-fill form
+    document.getElementById('login-email').value = 'student@ctu.edu.ph';
+    document.getElementById('login-password').value = 'student123';
+    
+    // Submit form
+    const form = document.getElementById('login-form');
+    if (form) {
+      form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
+  },
+
+  /**
+   * Update UI for logged in user
+   */
+  updateUIForLoggedInUser() {
+    if (!this.currentUser) return;
+    
+    // Update welcome message
+    const welcomeSpan = document.querySelector('.dash-welcome span');
+    if (welcomeSpan) {
+      welcomeSpan.textContent = this.currentUser.name;
+    }
+    
+    // Update role badge
+    const roleBadge = document.querySelector('.role-badge');
+    if (roleBadge) {
+      if (this.currentUser.role === 'student') {
+        roleBadge.textContent = `Student — ${this.currentUser.program}`;
+      } else if (this.currentUser.role === 'adviser') {
+        roleBadge.textContent = `Adviser — ${this.currentUser.department}`;
+      } else if (this.currentUser.role === 'librarian') {
+        roleBadge.textContent = `Librarian — ${this.currentUser.department}`;
+      }
+    }
+    
+    // Update login button to show user name
+    const loginBtn = document.querySelector('[data-action="show-login"]');
+    if (loginBtn) {
+      loginBtn.textContent = this.currentUser.name.split(' ')[0];
+      loginBtn.setAttribute('data-action', 'show-user-menu');
+      loginBtn.setAttribute('aria-label', 'User menu');
+    }
+  },
+
+  /**
+   * Logout user
+   */
+  logout() {
+    this.currentUser = null;
+    localStorage.removeItem('ctureap_user');
+    sessionStorage.removeItem('ctureap_user');
+    
+    // Reset UI
+    const loginBtn = document.querySelector('[data-action="show-user-menu"]');
+    if (loginBtn) {
+      loginBtn.textContent = 'Login';
+      loginBtn.setAttribute('data-action', 'show-login');
+      loginBtn.setAttribute('aria-label', 'Login to dashboard');
+    }
+    
+    // Go to landing page
+    if (typeof Navigation !== 'undefined') {
+      Navigation.switchView('landing');
+    }
+  },
+
+  /**
+   * Check if user is already logged in
+   */
+  checkExistingSession() {
+    const storedUser = localStorage.getItem('ctureap_user') || sessionStorage.getItem('ctureap_user');
+    
+    if (storedUser) {
+      try {
+        this.currentUser = JSON.parse(storedUser);
+        this.updateUIForLoggedInUser();
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+  },
+
+  /**
+   * Handle forgot password
+   */
+  forgotPassword() {
+    alert('Demo credentials:\n\nStudent:\nemail: student@ctu.edu.ph\npassword: student123\n\nAdviser:\nemail: adviser@ctu.edu.ph\npassword: adviser123\n\nLibrarian:\nemail: librarian@ctu.edu.ph\npassword: librarian123');
+  },
+
+  /**
+   * Initialize authentication module
+   */
+  init() {
+    // Check for existing session
+    this.checkExistingSession();
+    
+    // Setup form submission
+    const form = document.getElementById('login-form');
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleLogin(e));
+    }
+    
+    // Close modal on overlay click
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          this.closeLoginModal();
+        }
+      });
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        this.closeLoginModal();
+      }
+    });
+    
+    console.log('✓ Auth initialized');
+  }
+};
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Auth;
+}

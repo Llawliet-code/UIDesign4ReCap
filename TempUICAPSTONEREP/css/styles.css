@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Import modular CSS files */
+@import url('layout.css');
+@import url('components.css');
+@import url('utilities.css');
+
 /* =====================================================
    CTU RECAP - Enhanced Styles with Modern Features
    Dark Mode, Animations, Accessibility & More
@@ -184,6 +189,21 @@ body {
 }
 
 .nav-logo:hover {
+  transform: scale(1.05);
+}
+
+/* Logo Image */
+.nav-logo-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+  cursor: pointer;
+  display: block;
+}
+
+.nav-logo-img:hover {
   transform: scale(1.05);
 }
 
@@ -676,21 +696,7 @@ body {
 /* =====================
    FILTERS + RESULTS LAYOUT
    ===================== */
-.content-grid {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 20px;
-}
-
-.sidebar {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 0.5px solid var(--border);
-  padding: 16px;
-  height: fit-content;
-  position: sticky;
-  top: 80px;
-}
+/* Layout styles moved to layout.css */
 
 .sidebar-header {
   display: flex;
@@ -1017,11 +1023,7 @@ body {
 /* =====================
    DETAIL VIEW
    ===================== */
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 20px;
-}
+/* Layout styles moved to layout.css */
 
 .detail-main {
   background: var(--surface);
@@ -1104,9 +1106,7 @@ body {
 }
 
 .detail-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  /* Moved to layout.css */
 }
 
 .fair-card {
@@ -1208,22 +1208,7 @@ body {
 /* =====================
    DASHBOARD
    ===================== */
-.dash-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.dash-welcome {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.dash-welcome span {
-  color: var(--ctu-blue);
-}
+/* Layout styles moved to layout.css and utilities.css */
 
 .role-badge {
   background: var(--ctu-orange-light);
@@ -1262,12 +1247,7 @@ body {
   background: var(--surface-2);
 }
 
-.dash-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
+/* Layout styles moved to layout.css */
 
 .stat-card {
   background: var(--surface);
@@ -1294,12 +1274,7 @@ body {
   color: var(--text-secondary);
 }
 
-.saved-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
+/* Layout styles moved to layout.css */
 
 .saved-card {
   background: var(--surface);

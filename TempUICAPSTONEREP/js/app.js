@@ -1,163 +1,206 @@
-/* =====================
-   VIEW NAVIGATION
-   ===================== */
+/**
+ * Main Application Entry Point
+ * Initializes all modules and sets up the application
+ */
+
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 Initializing CTU RECAP...');
+
+  // Initialize all modules
+  if (typeof ThemeManager !== 'undefined') {
+    ThemeManager.init();
+    console.log('✓ Theme Manager initialized');
+  }
+
+  if (typeof Navigation !== 'undefined') {
+    Navigation.init();
+    console.log('✓ Navigation initialized');
+  }
+
+  if (typeof Filters !== 'undefined') {
+    Filters.init();
+    console.log('✓ Filters initialized');
+  }
+
+  if (typeof Search !== 'undefined') {
+    Search.init();
+    console.log('✓ Search initialized');
+  }
+
+  if (typeof Chat !== 'undefined') {
+    Chat.init();
+    console.log('✓ Chat initialized');
+  }
+
+  if (typeof Utils !== 'undefined') {
+    Utils.init();
+    console.log('✓ Utils initialized');
+  }
+
+  if (typeof Auth !== 'undefined') {
+    Auth.init();
+    console.log('✓ Auth initialized');
+  }
+
+  console.log('✨ CTU RECAP - All systems ready!');
+  
+  // Set up global event listeners for data-attribute based interactions
+  setupGlobalListeners();
+});
 
 /**
- * Switches the active view/tab in the app.
- * @param {string} v - View name: 'landing' | 'dashboard' | 'detail' | 'chatbot'
+ * Set up global event listeners for data-attribute based interactions
  */
-function switchView(v) {
-  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-
-  document.getElementById('view-' + v).classList.add('active');
-
-  const idx = { landing: 0, dashboard: 1, detail: 2, chatbot: 3 }[v];
-  document.querySelectorAll('.tab')[idx].classList.add('active');
-
-  window.scrollTo(0, 0);
-}
-
-/* =====================
-   DASHBOARD ROLE TABS
-   ===================== */
-
-/**
- * Switches the active role panel in the dashboard.
- * @param {HTMLElement} el - The clicked role tab element
- * @param {string} role - Role name: 'student' | 'adviser' | 'librarian'
- */
-function switchRole(el, role) {
-  document.querySelectorAll('.role-tab').forEach(x => x.classList.remove('active'));
-  el.classList.add('active');
-
-  ['student', 'adviser', 'librarian'].forEach(r => {
-    const panel = document.getElementById('dash-' + r);
-    if (panel) panel.style.display = (r === role) ? 'block' : 'none';
+function setupGlobalListeners() {
+  // Single click handler for all data-attribute interactions
+  document.addEventListener('click', (e) => {
+    // Handle data-action (highest priority)
+    const actionTarget = e.target.closest('[data-action]');
+    if (actionTarget) {
+      e.preventDefault();
+      const action = actionTarget.dataset.action;
+      handleAction(action, actionTarget);
+      return;
+    }
+    
+    // Handle data-view navigation
+    const viewTarget = e.target.closest('[data-view]');
+    if (viewTarget && typeof Navigation !== 'undefined') {
+      e.preventDefault();
+      const view = viewTarget.dataset.view;
+      Navigation.switchView(view);
+      return;
+    }
+    
+    // Handle data-role tab clicks
+    const roleTarget = e.target.closest('[data-role]');
+    if (roleTarget && typeof Navigation !== 'undefined') {
+      const role = roleTarget.dataset.role;
+      Navigation.switchRole(roleTarget, role);
+      return;
+    }
+    
+    // Handle data-suggestion clicks
+    const suggestionTarget = e.target.closest('[data-suggestion]');
+    if (suggestionTarget && typeof Chat !== 'undefined') {
+      const suggestion = suggestionTarget.dataset.suggestion;
+      Chat.sendSuggestion(suggestionTarget, suggestion);
+      return;
+    }
+    
+    // Handle data-filter-toggle clicks
+    const filterTarget = e.target.closest('[data-filter-toggle]');
+    if (filterTarget && typeof Filters !== 'undefined') {
+      Filters.toggleSection(filterTarget);
+      return;
+    }
+  });
+  
+  // Handle Enter key on data-enter-send inputs
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.hasAttribute('data-enter-send')) {
+      e.preventDefault();
+      if (e.target.id === 'chat-input' && typeof Chat !== 'undefined') {
+        Chat.sendMessage();
+      }
+    }
   });
 }
 
-/* =====================
-   FLOATING CHATBOT (FAB)
-   ===================== */
-
 /**
- * Toggles the floating chat panel open/closed.
+ * Handle various data-action events
  */
-function toggleChat() {
-  const panel = document.getElementById('chat-panel');
-  panel.classList.toggle('open');
+function handleAction(action, element) {
+  console.log('Action triggered:', action); // Debug log
+  
+  switch (action) {
+    case 'toggle-chat':
+      console.log('Toggling chat...'); // Debug log
+      if (typeof Chat !== 'undefined') {
+        Chat.togglePanel();
+      } else {
+        console.error('Chat module not loaded');
+      }
+      break;
+    case 'send-chat':
+      if (typeof Chat !== 'undefined') Chat.sendMessage();
+      break;
+    case 'send-inline':
+      if (typeof Chat !== 'undefined') Chat.sendInlineMessage();
+      break;
+    case 'validate':
+      if (typeof Utils !== 'undefined') Utils.runValidation();
+      break;
+    case 'show-login':
+      if (typeof Auth !== 'undefined') Auth.showLoginModal();
+      break;
+    case 'close-login':
+      if (typeof Auth !== 'undefined') Auth.closeLoginModal();
+      break;
+    case 'toggle-password':
+      if (typeof Auth !== 'undefined') Auth.togglePassword();
+      break;
+    case 'demo-login':
+      if (typeof Auth !== 'undefined') Auth.demoLogin();
+      break;
+    case 'forgot-password':
+      if (typeof Auth !== 'undefined') Auth.forgotPassword();
+      break;
+    case 'show-register':
+      alert('Registration feature coming soon!');
+      break;
+    case 'show-user-menu':
+      if (typeof Auth !== 'undefined') {
+        const confirmLogout = confirm('Do you want to logout?');
+        if (confirmLogout) Auth.logout();
+      }
+      break;
+    default:
+      console.warn(`Unknown action: ${action}`);
+  }
 }
 
-/**
- * Sends a message in the floating chat panel.
- */
-function sendChat() {
-  const input = document.getElementById('chat-input');
-  const messages = document.getElementById('chat-messages');
-
-  if (!input.value.trim()) return;
-
-  // Append user message
-  const userMsg = document.createElement('div');
-  userMsg.className = 'msg msg-user';
-  userMsg.textContent = input.value;
-  messages.appendChild(userMsg);
-
-  // Append bot response
-  const botMsg = document.createElement('div');
-  botMsg.className = 'msg msg-bot';
-  botMsg.textContent = "Let me search the repository for you... I'll find the most relevant capstone projects matching your query.";
-  messages.appendChild(botMsg);
-
-  input.value = '';
-  messages.scrollTop = messages.scrollHeight;
-}
-
-/* =====================
-   INLINE CHATBOT (CHATBOT VIEW)
-   ===================== */
-
-/** Predefined responses for suggestion chips */
-const suggestionResponses = {
-  'How do I upload my abstract?':
-    'To upload your abstract, log in with your student account, go to Dashboard, and click "Submit Capstone Metadata". Fill in the required fields and your adviser will receive a validation request automatically.',
-  'Show me IoT projects from 2024 using Arduino':
-    'I found 6 IoT projects from 2024 using Arduino! The top result is "IoT-Based Soil Moisture Detection" by Fernandez & Bautista. Click to view all 6 results in the search page.',
-  'Summarize research trends in 2025':
-    'In 2025, the top research trends from CTU capstone projects include: Machine Learning & AI (34%), IoT & Hardware Systems (28%), Web & Mobile Applications (22%), and Data Analytics (16%). ML adoption grew 40% compared to 2024.'
+// Make functions globally available for HTML event handlers (temporary)
+// These will be removed once HTML is fully refactored
+window.switchView = function(view) {
+  if (typeof Navigation !== 'undefined') {
+    Navigation.switchView(view);
+  }
 };
 
-/**
- * Handles clicking a suggestion chip in the inline chatbot.
- * @param {HTMLElement} btn - The clicked suggestion button
- * @param {string} text - The suggestion text
- */
-function sendSuggestion(btn, text) {
-  document.getElementById('inline-suggestions').style.display = 'none';
-
-  const messages = document.getElementById('inline-chat-messages');
-
-  const userMsg = document.createElement('div');
-  userMsg.className = 'msg msg-user';
-  userMsg.textContent = text;
-  messages.appendChild(userMsg);
-
-  setTimeout(() => {
-    const botMsg = document.createElement('div');
-    botMsg.className = 'msg msg-bot';
-    botMsg.textContent = suggestionResponses[text] || 'Great question! Let me look that up in the repository for you.';
-    messages.appendChild(botMsg);
-    messages.scrollTop = messages.scrollHeight;
-  }, 600);
-}
-
-/**
- * Sends a typed message in the inline chatbot view.
- */
-function sendInlineMessage() {
-  const input = document.getElementById('inline-chat-input');
-  if (!input.value.trim()) return;
-
-  const messages = document.getElementById('inline-chat-messages');
-  document.getElementById('inline-suggestions').style.display = 'none';
-
-  const userMsg = document.createElement('div');
-  userMsg.className = 'msg msg-user';
-  userMsg.textContent = input.value;
-  messages.appendChild(userMsg);
-
-  input.value = '';
-
-  setTimeout(() => {
-    const botMsg = document.createElement('div');
-    botMsg.className = 'msg msg-bot';
-    botMsg.textContent = "I'm searching the repository for that. I'll surface the most relevant capstone studies for you right away!";
-    messages.appendChild(botMsg);
-    messages.scrollTop = messages.scrollHeight;
-  }, 500);
-}
-
-/* =====================
-   ADVISER VALIDATION
-   ===================== */
-
-/**
- * Placeholder for the title originality validation logic.
- * Will be connected to the AI backend in production.
- */
-function runValidation() {
-  return true;
-}
-
-/* =====================
-   EVENT LISTENERS
-   ===================== */
-document.addEventListener('DOMContentLoaded', () => {
-  const inlineInput = document.getElementById('inline-chat-input');
-  if (inlineInput) {
-    inlineInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') sendInlineMessage();
-    });
+window.switchRole = function(element, role) {
+  if (typeof Navigation !== 'undefined') {
+    Navigation.switchRole(element, role);
   }
-});
+};
+
+window.toggleChat = function() {
+  if (typeof Chat !== 'undefined') {
+    Chat.togglePanel();
+  }
+};
+
+window.sendChat = function() {
+  if (typeof Chat !== 'undefined') {
+    Chat.sendMessage();
+  }
+};
+
+window.sendInlineMessage = function() {
+  if (typeof Chat !== 'undefined') {
+    Chat.sendInlineMessage();
+  }
+};
+
+window.sendSuggestion = function(button, text) {
+  if (typeof Chat !== 'undefined') {
+    Chat.sendSuggestion(button, text);
+  }
+};
+
+window.runValidation = function() {
+  if (typeof Utils !== 'undefined') {
+    return Utils.runValidation();
+  }
+};
