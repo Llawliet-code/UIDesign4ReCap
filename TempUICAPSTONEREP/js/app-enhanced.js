@@ -530,3 +530,299 @@ document.addEventListener('DOMContentLoaded', () => {
   
   console.log('✨ CTU RECAP Enhanced - All systems ready!');
 });
+
+
+/* =====================
+   FILTER SECTION TOGGLE
+   ===================== */
+
+/**
+ * Toggle filter section open/closed
+ * @param {HTMLElement} button - The filter title button
+ */
+function toggleFilterSection(button) {
+  const isExpanded = button.getAttribute('aria-expanded') === 'true';
+  button.setAttribute('aria-expanded', !isExpanded);
+  
+  const content = button.nextElementSibling;
+  if (content) {
+    content.style.display = isExpanded ? 'none' : 'flex';
+  }
+}
+
+/* =====================
+   FILTER UPDATES
+   ===================== */
+
+/**
+ * Update filters and show active filter chips
+ */
+function updateFilters() {
+  const activeFilters = [];
+  
+  // Collect all checked filters
+  document.querySelectorAll('.filter-content input[type="checkbox"]:checked').forEach(checkbox => {
+    const label = document.querySelector(`label[for="${checkbox.id}"]`);
+    if (label) {
+      activeFilters.push({
+        id: checkbox.id,
+        text: label.textContent.trim()
+      });
+    }
+  });
+  
+  // Update filter chips display
+  updateFilterChips(activeFilters);
+  
+  // Update results count (simulated)
+  updateResultsCount(activeFilters.length);
+}
+
+/**
+ * Update active filter chips in sidebar
+ * @param {Array} filters - Array of active filters
+ */
+function updateFilterChips(filters) {
+  const container = document.getElementById('active-filters');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  filters.forEach(filter => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip';
+    chip.innerHTML = `
+      ${filter.text}
+      <span class="filter-chip-remove" onclick="removeFilter('${filter.id}')" aria-label="Remove ${filter.text} filter" role="button" tabindex="0">×</span>
+    `;
+    container.appendChild(chip);
+  });
+}
+
+/**
+ * Clear all filters
+ */
+function clearAllFilters() {
+  // Uncheck all checkboxes
+  document.querySelectorAll('.filter-content input[type="checkbox"]').forEach(checkbox => {
+    checkbox.checked = false;
+  });
+  
+  // Clear keyword input
+  const keywordInput = document.getElementById('keyword-input');
+  if (keywordInput) {
+    keywordInput.value = '';
+  }
+  
+  // Update display
+  updateFilters();
+}
+
+/**
+ * Update results count display
+ * @param {number} filterCount - Number of active filters
+ */
+function updateResultsCount(filterCount) {
+  const totalElement = document.getElementById('results-total');
+  if (totalElement) {
+    // Simulate different result counts based on filters
+    const baseCounts = [42, 38, 35, 31, 28, 24, 20];
+    const count = baseCounts[Math.min(filterCount, baseCounts.length - 1)];
+    totalElement.textContent = count;
+  }
+}
+
+/* =====================
+   KEYWORD SEARCH
+   ===================== */
+
+let keywordTimeout;
+
+/**
+ * Debounced keyword search
+ * @param {string} value - Search keyword
+ */
+function debouncedKeywordSearch(value) {
+  clearTimeout(keywordTimeout);
+  
+  keywordTimeout = setTimeout(() => {
+    if (value.trim()) {
+      console.log('Searching for keyword:', value);
+      // Add keyword as a filter chip
+      addKeywordChip(value);
+    }
+  }, 500);
+}
+
+/**
+ * Add keyword as filter chip
+ * @param {string} keyword - The keyword to add
+ */
+function addKeywordChip(keyword) {
+  const container = document.getElementById('active-filters');
+  if (!container) return;
+  
+  // Check if keyword chip already exists
+  const existingChips = container.querySelectorAll('.filter-chip');
+  for (let chip of existingChips) {
+    if (chip.textContent.includes(keyword)) {
+      return; // Already exists
+    }
+  }
+  
+  const chip = document.createElement('div');
+  chip.className = 'filter-chip';
+  chip.innerHTML = `
+    🔍 ${keyword}
+    <span class="filter-chip-remove" onclick="removeKeywordChip(this)" aria-label="Remove ${keyword} filter" role="button" tabindex="0">×</span>
+  `;
+  container.appendChild(chip);
+}
+
+/**
+ * Remove keyword chip
+ * @param {HTMLElement} element - The remove button element
+ */
+function removeKeywordChip(element) {
+  const chip = element.closest('.filter-chip');
+  if (chip) {
+    chip.remove();
+  }
+  
+  // Clear keyword input
+  const keywordInput = document.getElementById('keyword-input');
+  if (keywordInput) {
+    keywordInput.value = '';
+  }
+}
+
+/* =====================
+   NATURAL LANGUAGE SEARCH TOGGLE
+   ===================== */
+
+/**
+ * Toggle natural language search
+ */
+function toggleNLSearch() {
+  const toggle = document.querySelector('.search-toggle');
+  if (!toggle) return;
+  
+  const isChecked = toggle.getAttribute('aria-checked') === 'true';
+  toggle.setAttribute('aria-checked', !isChecked);
+  
+  // Visual feedback
+  const pill = toggle.querySelector('.toggle-pill');
+  if (pill) {
+    pill.style.background = isChecked ? 'var(--text-hint)' : 'var(--ctu-orange)';
+  }
+  
+  console.log('Natural Language Search:', !isChecked ? 'ON' : 'OFF');
+}
+
+/* =====================
+   SORT RESULTS
+   ===================== */
+
+/**
+ * Sort search results
+ * @param {string} sortType - Sort type: 'relevant', 'newest', 'oldest'
+ */
+function sortResults(sortType) {
+  console.log('Sorting by:', sortType);
+  
+  // Show loading state
+  showLoadingSkeleton();
+  
+  // Simulate sorting delay
+  setTimeout(() => {
+    hideLoadingSkeleton();
+    
+    // Update results (in real app, this would re-fetch/re-sort data)
+    const resultsQuery = document.getElementById('results-query');
+    if (resultsQuery) {
+      resultsQuery.textContent = resultsQuery.textContent + ' (sorted)';
+    }
+  }, 500);
+}
+
+/* =====================
+   AUTH MODAL FUNCTIONS (Placeholders)
+   ===================== */
+
+/**
+ * Open authentication modal
+ * @param {string} mode - 'login' or 'register'
+ */
+function openAuthModal(mode) {
+  console.log('Opening auth modal:', mode);
+  alert(`${mode === 'login' ? 'Login' : 'Sign Up'} functionality will be connected to Firebase`);
+}
+
+/**
+ * Handle logout
+ */
+function handleLogout() {
+  console.log('Logging out...');
+  alert('Logout functionality will be connected to Firebase');
+}
+
+/* =====================
+   INITIALIZATION - UPDATE
+   ===================== */
+
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize theme
+  initTheme();
+  
+  // Setup theme toggle button
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+  
+  // Setup keyboard navigation
+  setupKeyboardNavigation();
+  
+  // Setup search input
+  const searchBar = document.getElementById('main-search');
+  if (searchBar) {
+    searchBar.addEventListener('input', (e) => handleSearch(e.target.value));
+  }
+  
+  // Setup inline chat input
+  const inlineInput = document.getElementById('inline-chat-input');
+  if (inlineInput) {
+    inlineInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendInlineMessage();
+    });
+  }
+  
+  // Setup floating chat input
+  const chatInput = document.getElementById('chat-input');
+  if (chatInput) {
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendChat();
+    });
+  }
+  
+  // Setup save buttons
+  document.querySelectorAll('.save-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSave(btn);
+    });
+  });
+  
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      setTheme(e.matches ? 'dark' : 'light', false);
+    }
+  });
+  
+  // Initialize filters - show initial filter chips
+  updateFilters();
+  
+  console.log('✨ CTU RECAP Enhanced - All systems ready!');
+});
