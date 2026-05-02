@@ -249,7 +249,7 @@ const Citation = {
       // Show success feedback
       const button = document.querySelector('[data-action="copy-citation"]');
       const originalText = button.innerHTML;
-      button.innerHTML = '✓ Copied!';
+      button.innerHTML = '&#10003; Copied!';
       button.style.background = '#27ae60';
       
       setTimeout(() => {

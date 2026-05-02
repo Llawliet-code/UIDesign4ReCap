@@ -145,7 +145,7 @@ const Admin = {
       tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center text-red p-5">
-            <div class="mb-2">⚠️</div>
+            <div class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:0.6"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <div>Error loading projects. Please try again.</div>
           </td>
         </tr>
@@ -165,7 +165,7 @@ const Admin = {
       tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center text-secondary p-5">
-            <div class="mb-2">📚</div>
+            <div class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:0.4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
             <div>No projects found. Click "Add New Project" to get started.</div>
           </td>
         </tr>

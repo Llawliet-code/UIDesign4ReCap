@@ -8,6 +8,12 @@ const Navigation = {
    * Switch between different views
    */
   switchView(viewName) {
+    // Guard dashboard — must be logged in
+    if (viewName === 'dashboard' && (typeof Auth === 'undefined' || !Auth.currentUser)) {
+      if (typeof Auth !== 'undefined') Auth.showLoginModal();
+      return;
+    }
+
     // Update views
     document.querySelectorAll('.view').forEach(view => {
       view.classList.remove('active');

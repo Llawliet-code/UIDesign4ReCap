@@ -45,7 +45,10 @@
         class="btn btn-ghost theme-toggle" 
         aria-label="Toggle dark mode"
         title="Toggle dark mode">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true">
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
       </button>
       <!-- Auth buttons (shown when logged out) -->
       <div class="nav-auth-buttons" id="nav-auth-buttons">
@@ -76,7 +79,7 @@
     <button class="tab" role="tab" aria-selected="false" aria-controls="view-chatbot" data-view="chatbot" tabindex="-1">
       AI Chatbot
     </button>
-      <button class="tab" role="tab" aria-selected="false" aria-controls="view-dashboard" data-view="dashboard" tabindex="-1">
+      <button class="tab" role="tab" aria-selected="false" aria-controls="view-dashboard" data-view="dashboard" tabindex="-1" id="tab-dashboard" style="display:none">
       User Dashboard
     </button>
   </div>
@@ -212,7 +215,9 @@
         <div id="results-container">
           <!-- Empty state -->
           <div class="empty-state" id="empty-state">
-            <div class="empty-icon">📚</div>
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
             <h3 class="empty-title">No Projects Yet</h3>
             <p class="empty-text">Projects will appear here once they are added by the admin.</p>
             <p class="empty-hint">Admin can add projects from the Dashboard → Admin Panel</p>
@@ -230,7 +235,8 @@
   <div class="view" id="view-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
     <div class="dash-header">
       <div>
-        <div class="dash-welcome">Welcome back, <span>Juan dela Cruz</span> 👋</div>
+        <div class="dash-welcome">Welcome back! <span>Juan dela Cruz</span>
+        </div>
         <div class="text-md text-secondary mt-1">Last login: April 26, 2026</div>
       </div>
       <span class="role-badge">Student — BSIT 3A</span>
@@ -255,22 +261,30 @@
         <div class="saved-card">
           <div class="saved-title">Smart Attendance Monitoring System Using Facial Recognition</div>
           <div class="saved-meta">Reyes et al. · BSIT · 2024</div>
-          <div class="saved-remove">✕ Remove</div>
+          <div class="saved-remove">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
+          </div>
         </div>
         <div class="saved-card">
           <div class="saved-title">IoT-Based Soil Moisture Detection for Precision Agriculture</div>
           <div class="saved-meta">Fernandez et al. · BSIT · 2024</div>
-          <div class="saved-remove">✕ Remove</div>
+          <div class="saved-remove">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
+          </div>
         </div>
         <div class="saved-card">
           <div class="saved-title">Mobile-Based Flood Warning System for Coastal Barangays</div>
           <div class="saved-meta">Abad et al. · BSIT · 2023</div>
-          <div class="saved-remove">✕ Remove</div>
+          <div class="saved-remove">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
+          </div>
         </div>
         <div class="saved-card">
           <div class="saved-title">Automated Grading System Using NLP for Essay Evaluation</div>
           <div class="saved-meta">Cruz et al. · BSIT · 2022</div>
-          <div class="saved-remove">✕ Remove</div>
+          <div class="saved-remove">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
+          </div>
         </div>
       </div>
     </div>
@@ -302,7 +316,8 @@
             <span class="val-sim sim-low">31% match</span>
           </div>
           <div class="mt-3 p-2 bg-orange-light rounded-md text-base text-orange">
-            ⚠ Moderate overlap detected. Advise student to differentiate scope or methodology from existing works.
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Moderate overlap detected. Advise student to differentiate scope or methodology from existing works.
           </div>
         </div>
       </div>
@@ -401,7 +416,7 @@
         <option value="BSAgriBusiness">BSAgriBusiness</option>
       </select>
       <button class="btn btn-blue ripple" data-action="admin-refresh">
-        🔄 Refresh
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:4px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh
       </button>
     </div>
 
@@ -422,7 +437,9 @@
           <!-- Dynamically populated -->
           <tr>
             <td colspan="6" class="text-center text-secondary p-5">
-              <div class="mb-2">📚</div>
+              <div class="mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:0.4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
               <div>No projects yet. Click "Add New Project" to get started.</div>
             </td>
           </tr>
@@ -484,7 +501,9 @@
             <div class="fair-dot" style="background:#8e44ad"></div>
             <div><div class="fair-label">Reusable</div><div class="fair-sub">Clear attribution info</div></div>
           </div>
-          <button class="cite-btn" data-action="show-citation">📋 Cite This Project</button>
+          <button class="cite-btn" data-action="show-citation">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px;vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>Cite This Project
+          </button>
         </div>
 
         <div class="fair-card">
@@ -530,11 +549,11 @@
           <div class="chat-avatar">AI</div>
           <div class="chat-head-info">
             <div class="chat-head-name">Kapstone Assistant</div>
-            <div class="chat-head-status">● Online — CTU Repository AI</div>
+            <div class="chat-head-status"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color:#27ae60;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/></svg> Online — CTU Repository AI</div>
           </div>
         </div>
         <div class="chat-messages" id="inline-chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
-          <div class="msg msg-bot">Hi! I'm your Kapstone Assistant 👋 I can help you find research, navigate the system, or summarize trends. What do you need?</div>
+          <div class="msg msg-bot">Hi! I'm your Kapstone Assistant! I can help you find research, navigate the system, or summarize trends. What do you need?</div>
           <div class="typing-indicator hidden" id="typing-indicator" aria-label="Assistant is typing">
             <span></span><span></span><span></span>
           </div>
@@ -546,7 +565,7 @@
         </div>
         <div class="chat-input-row">
           <input class="chat-input" type="text" id="inline-chat-input" placeholder="Ask anything about the repository..." />
-          <button class="chat-send" data-action="send-inline">➤</button>
+          <button class="chat-send" data-action="send-inline"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
         </div>
       </div>
     </div>
@@ -568,9 +587,9 @@
     <div class="chat-avatar">AI</div>
     <div class="chat-head-info">
       <div class="chat-head-name">Kapstone Assistant</div>
-      <div class="chat-head-status">● Online</div>
+      <div class="chat-head-status"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color:#27ae60;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/></svg> Online</div>
     </div>
-    <button class="chat-close" data-action="toggle-chat" aria-label="Close chat">✕</button>
+    <button class="chat-close" data-action="toggle-chat" aria-label="Close chat"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="chat-messages" id="chat-messages">
     <div class="msg msg-bot">Hi! I'm here to help you navigate the CTU Capstone Repository. Ask me anything!</div>
@@ -585,7 +604,7 @@
       placeholder="Type a message..."
       data-enter-send
     />
-    <button class="chat-send" data-action="send-chat" aria-label="Send message">➤</button>
+    <button class="chat-send" data-action="send-chat" aria-label="Send message"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
   </div>
 </div>
 
@@ -596,7 +615,7 @@
   <div class="modal-container modal-large">
     <div class="modal-header">
       <h2 id="project-modal-title" class="modal-title">Add New Project</h2>
-      <button class="modal-close" data-action="close-project-modal" aria-label="Close modal">✕</button>
+      <button class="modal-close" data-action="close-project-modal" aria-label="Close modal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     
     <div class="modal-body">
@@ -749,7 +768,7 @@
   <div class="modal-container">
     <div class="modal-header">
       <h2 id="login-title" class="modal-title">Login to CTU RECAP</h2>
-      <button class="modal-close" data-action="close-login" aria-label="Close login modal">✕</button>
+      <button class="modal-close" data-action="close-login" aria-label="Close login modal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     
     <div class="modal-body">
@@ -783,7 +802,9 @@
               class="password-toggle" 
               data-action="toggle-password"
               aria-label="Toggle password visibility">
-              <span class="password-icon">👁️</span>
+              <span class="password-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
             </button>
           </div>
           <span class="form-error hidden" id="password-error">Password is required</span>
@@ -812,7 +833,7 @@
         
         <div class="form-group">
           <button type="button" class="btn btn-outline w-full" data-action="demo-login">
-            <span>🎓</span> Demo Login (Student)
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px;vertical-align:middle"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Demo Login (Student)
           </button>
         </div>
         
@@ -823,7 +844,9 @@
       
       <!-- Success Message -->
       <div class="login-success hidden" id="login-success">
-        <div class="success-icon">✓</div>
+        <div class="success-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
         <h3 class="text-xl font-semibold text-primary mb-2">Login Successful!</h3>
         <p class="text-md text-secondary mb-4">Redirecting to dashboard...</p>
       </div>
@@ -838,7 +861,7 @@
   <div class="modal-container">
     <div class="modal-header">
       <h2 id="signup-title" class="modal-title">Create an Account</h2>
-      <button class="modal-close" data-action="close-signup" aria-label="Close signup modal">✕</button>
+      <button class="modal-close" data-action="close-signup" aria-label="Close signup modal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
 
     <div class="modal-body">
@@ -885,7 +908,9 @@
           <div class="password-input-wrapper">
             <input type="password" id="signup-password" class="form-input" placeholder="At least 6 characters" required autocomplete="new-password" />
             <button type="button" class="password-toggle" data-action="toggle-signup-password" aria-label="Toggle password visibility">
-              <span class="password-icon">👁️</span>
+              <span class="password-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
             </button>
           </div>
           <span class="form-error hidden" id="signup-password-error">Password must be at least 6 characters</span>
@@ -896,7 +921,9 @@
           <div class="password-input-wrapper">
             <input type="password" id="signup-confirm-password" class="form-input" placeholder="Re-enter your password" required autocomplete="new-password" />
             <button type="button" class="password-toggle" data-action="toggle-signup-confirm-password" aria-label="Toggle confirm password visibility">
-              <span class="password-icon">👁️</span>
+              <span class="password-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
             </button>
           </div>
           <span class="form-error hidden" id="signup-confirm-error">Passwords do not match</span>
@@ -916,7 +943,9 @@
 
       <!-- Success Message -->
       <div class="login-success hidden" id="signup-success">
-        <div class="success-icon">✓</div>
+        <div class="success-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
         <h3 class="text-xl font-semibold text-primary mb-2">Account Created!</h3>
         <p class="text-md text-secondary mb-4">Welcome aboard. Redirecting to your dashboard...</p>
       </div>
@@ -931,7 +960,7 @@
   <div class="modal-container modal-large">
     <div class="modal-header">
       <h2 id="citation-title" class="modal-title">Cite This Project</h2>
-      <button class="modal-close" data-action="close-citation" aria-label="Close citation modal">✕</button>
+      <button class="modal-close" data-action="close-citation" aria-label="Close citation modal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     
     <div class="modal-body">
@@ -951,7 +980,7 @@
           <!-- Citation will be generated here -->
         </div>
         <button class="btn btn-blue w-full ripple mt-3" data-action="copy-citation">
-          📋 Copy Citation
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px;vertical-align:middle"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>Copy Citation
         </button>
       </div>
       
@@ -971,12 +1000,14 @@
   <div class="modal-container" style="max-width: 400px;">
     <div class="modal-header">
       <h2 id="logout-title" class="modal-title">Confirm Logout</h2>
-      <button class="modal-close" data-action="close-logout" aria-label="Close logout modal">✕</button>
+      <button class="modal-close" data-action="close-logout" aria-label="Close logout modal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     
     <div class="modal-body">
       <div class="text-center mb-4">
-        <div class="logout-icon">👋</div>
+        <div class="logout-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
         <p class="text-md text-primary mb-2">Are you sure you want to logout?</p>
         <p class="text-sm text-secondary">You will need to login again to access your dashboard.</p>
       </div>
@@ -995,6 +1026,7 @@
 
 <script src="js/firebase-config.js"></script>
 <script src="js/database.js"></script>
+<script src="js/seed-accounts.js"></script>
 <script src="js/api-keys.js"></script>
 <script src="js/api-keys-checker.js"></script>
 <script src="js/groq-config.js"></script>

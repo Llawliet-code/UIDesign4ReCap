@@ -333,10 +333,6 @@ body.theme-transitioning {
   gap: 6px;
 }
 
-.nav-auth-buttons.hidden {
-  display: none !important;
-}
-
 .nav-login-btn {
   font-size: 13px;
   font-weight: 500;

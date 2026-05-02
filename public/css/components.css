@@ -479,6 +479,7 @@
   font-size: 16px;
   opacity: 0.6;
   transition: opacity var(--transition-fast);
+  color: #fff;
 }
 
 .password-toggle:hover {
@@ -1001,6 +1002,11 @@
 .empty-icon {
   font-size: 64px;
   margin-bottom: 20px;
+  color: var(--ctu-blue);
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+}
   opacity: 0.5;
 }
 

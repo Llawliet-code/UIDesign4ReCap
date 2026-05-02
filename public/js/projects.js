@@ -70,8 +70,8 @@ const Projects = {
           <span class="result-year" aria-label="Published in ${project.year}">${project.year || 'N/A'}</span>
         </div>
         <div class="result-meta">
-          <span>👤 ${this.escapeHtml(authors)}</span>
-          <span>🎓 ${this.escapeHtml(project.program || 'N/A')}</span>
+          <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${this.escapeHtml(authors)}</span>
+          <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>${this.escapeHtml(project.program || 'N/A')}</span>
         </div>
         <div class="result-abstract">${this.escapeHtml(this.truncate(project.abstract, 200))}</div>
         <div class="result-tags">
@@ -79,7 +79,7 @@ const Projects = {
         </div>
         <div class="result-actions">
           <button class="save-btn ripple" data-action="save-project" data-project-id="${project.id}" aria-label="Save this project" aria-pressed="false">
-            <span aria-hidden="true">☆</span> Save
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save
           </button>
           <button class="view-btn ripple" data-action="view-project" data-project-id="${project.id}" aria-label="View project details">
             View Details →
@@ -95,7 +95,12 @@ const Projects = {
   showEmptyState(container) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📚</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
         <h3 class="empty-title">No Projects Found</h3>
         <p class="empty-text">No capstone projects match your search criteria.</p>
         <p class="empty-hint">Try adjusting your filters or search terms.</p>
@@ -109,7 +114,9 @@ const Projects = {
   showErrorState(container) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
         <h3 class="empty-title">Error Loading Projects</h3>
         <p class="empty-text">There was a problem loading the projects.</p>
         <p class="empty-hint">Please refresh the page or try again later.</p>
@@ -186,10 +193,12 @@ const Projects = {
       if (results.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">🔍</div>
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
             <h3 class="empty-title">No Results Found</h3>
             <p class="empty-text">No projects match your search for "${this.escapeHtml(keyword)}"</p>
-            <p class="empty-hint">Try different keywords or check your spelling. Meilisearch is typo-tolerant!</p>
+            <p class="empty-hint">Try different keywords or check your spelling.</p>
           </div>
         `;
       } else {
@@ -305,11 +314,11 @@ const Projects = {
       if (isSaved) {
         await Database.unsaveProject(Auth.currentUser.id, projectId);
         button.setAttribute('aria-pressed', 'false');
-        button.innerHTML = '<span aria-hidden="true">☆</span> Save';
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save';
       } else {
         await Database.saveProject(Auth.currentUser.id, projectId);
         button.setAttribute('aria-pressed', 'true');
-        button.innerHTML = '<span aria-hidden="true">★</span> Saved';
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved';
       }
     } catch (error) {
       console.error('Error toggling save:', error);
