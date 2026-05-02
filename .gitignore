@@ -7,7 +7,6 @@ yarn-error.log*
 firebase-debug.log*
 firebase-debug.*.log*
 api-keys.js
-
 # Firebase cache
 .firebase/
 
@@ -76,7 +75,6 @@ data.ms/
 
 # Temporary folders
 dumps/
-TempUICAPSTONEREP/
 
 # Test files
 test-*.js
