@@ -5,7 +5,7 @@
 
 const GroqConfig = {
   // Groq API Configuration
-  apiKey: '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',
+  apiKey: '',
   apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
   
   // Model configuration
