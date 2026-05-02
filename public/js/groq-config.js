@@ -1,11 +1,13 @@
 /**
  * Groq API Configuration
  * Handles AI-powered semantic search using Groq
+ * 
+ * API key is loaded from api-keys.js
  */
 
 const GroqConfig = {
   // Groq API Configuration
-  apiKey: '',
+  apiKey: API_KEYS.groq,
   apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
   
   // Model configuration

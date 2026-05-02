@@ -1,12 +1,14 @@
 /**
  * AI Chatbot Configuration
  * Handles multiple AI providers with automatic fallback
+ * 
+ * API keys are loaded from api-keys.js
  */
 
 const AIConfig = {
   // Primary AI: Mistral AI
   mistral: {
-    apiKey: '',
+    apiKey: API_KEYS.mistral,
     apiUrl: 'https://api.mistral.ai/v1/chat/completions',
     model: 'mistral-tiny', // Fast and free tier friendly
     maxTokens: 1000,
@@ -15,7 +17,7 @@ const AIConfig = {
 
   // Fallback AI: Google Gemini
   gemini: {
-    apiKey: '',
+    apiKey: API_KEYS.gemini,
     apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
     model: 'gemini-pro',
     maxTokens: 1000,
