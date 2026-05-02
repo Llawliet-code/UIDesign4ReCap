@@ -1,15 +1,11 @@
 /**
  * Groq API Configuration
  * Handles AI-powered semantic search using Groq
- * 
- * SECURITY NOTE: API keys should not be in client-side code in production.
- * For production, use a backend proxy or environment variables.
  */
 
 const GroqConfig = {
   // Groq API Configuration
-  // TODO: Replace with your own API key or use environment variables
-  apiKey: localStorage.getItem('groq_api_key') || 'YOUR_GROQ_API_KEY_HERE',
+  apiKey: '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',
   apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
   
   // Model configuration

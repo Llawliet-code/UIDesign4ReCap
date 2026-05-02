@@ -1,15 +1,12 @@
 /**
  * AI Chatbot Configuration
  * Handles multiple AI providers with automatic fallback
- * 
- * SECURITY NOTE: API keys should not be in client-side code in production.
- * For production, use a backend proxy or environment variables.
  */
 
 const AIConfig = {
   // Primary AI: Mistral AI
   mistral: {
-    apiKey: localStorage.getItem('mistral_api_key') || 'YOUR_MISTRAL_API_KEY_HERE',
+    apiKey: '',
     apiUrl: 'https://api.mistral.ai/v1/chat/completions',
     model: 'mistral-tiny', // Fast and free tier friendly
     maxTokens: 1000,
@@ -18,7 +15,7 @@ const AIConfig = {
 
   // Fallback AI: Google Gemini
   gemini: {
-    apiKey: localStorage.getItem('gemini_api_key') || 'YOUR_GEMINI_API_KEY_HERE',
+    apiKey: '',
     apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
     model: 'gemini-pro',
     maxTokens: 1000,
