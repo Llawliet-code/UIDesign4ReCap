@@ -164,6 +164,12 @@ function handleAction(action, element) {
     case 'validate':
       if (typeof Utils !== 'undefined') Utils.runValidation();
       break;
+    case 'apply-filters':
+      if (typeof Filters !== 'undefined') Filters.apply();
+      break;
+    case 'clear-filters':
+      if (typeof Filters !== 'undefined') Filters.clearAll();
+      break;
     case 'show-login':
       if (typeof Auth !== 'undefined') Auth.showLoginModal();
       break;
@@ -180,7 +186,25 @@ function handleAction(action, element) {
       if (typeof Auth !== 'undefined') Auth.forgotPassword();
       break;
     case 'show-register':
-      alert('Registration feature coming soon!');
+      if (typeof Auth !== 'undefined') Auth.showSignupModal();
+      break;
+    case 'show-signup':
+      if (typeof Auth !== 'undefined') Auth.showSignupModal();
+      break;
+    case 'close-signup':
+      if (typeof Auth !== 'undefined') Auth.closeSignupModal();
+      break;
+    case 'show-login-from-signup':
+      if (typeof Auth !== 'undefined') {
+        Auth.closeSignupModal();
+        Auth.showLoginModal();
+      }
+      break;
+    case 'toggle-signup-password':
+      if (typeof Auth !== 'undefined') Auth.toggleSignupPassword('signup-password');
+      break;
+    case 'toggle-signup-confirm-password':
+      if (typeof Auth !== 'undefined') Auth.toggleSignupPassword('signup-confirm-password');
       break;
     case 'show-user-menu':
       if (typeof Auth !== 'undefined') {

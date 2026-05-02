@@ -64,7 +64,7 @@ const Projects = {
     const allTags = [...topics, ...keywords].slice(0, 4);
     
     return `
-      <article class="result-card card-hover" data-project-id="${project.id}" role="article" tabindex="0">
+      <article class="result-card card-hover" data-project-id="${this.escapeHtml(String(project.id))}" role="article" tabindex="0">
         <div class="result-card-top">
           <h2 class="result-title">${this.escapeHtml(project.title)}</h2>
           <span class="result-year" aria-label="Published in ${project.year}">${project.year || 'N/A'}</span>
@@ -340,11 +340,8 @@ const Projects = {
    * Initialize projects module
    */
   init() {
-    // Load projects on landing page
-    const landingView = document.getElementById('view-landing');
-    if (landingView && landingView.classList.contains('active')) {
-      this.loadProjects();
-    }
+    // Projects are loaded by Filters.init() → Filters.apply()
+    // so no separate loadProjects() call needed here
     
     // Setup event delegation for project actions
     document.addEventListener('click', (e) => {

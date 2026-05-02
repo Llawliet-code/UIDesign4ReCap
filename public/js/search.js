@@ -14,28 +14,26 @@ const Search = {
     clearTimeout(this.searchTimeout);
     
     this.searchTimeout = setTimeout(async () => {
-      console.log('🔍 AI Search triggered for:', query);
-      
+      console.log('🔍 Search triggered for:', query);
+
+      // Always go through Filters so active sidebar filters are respected
+      if (typeof Filters !== 'undefined') {
+        await Filters.runSearch();
+        return;
+      }
+
+      // Fallback if Filters not loaded
       if (!query.trim()) {
-        // Empty search - load all projects
         if (typeof Projects !== 'undefined') {
           await Projects.loadProjects();
         }
         return;
       }
-      
-      // Use Groq AI for semantic search
-      if (this.useNaturalLanguage && typeof GroqService !== 'undefined' && !GroqService.useFallback) {
-        console.log('✓ Using Groq AI semantic search');
-        await this.searchWithGroq(query);
-      } else {
-        // Fallback to Firebase search
-        console.log('⚠️ Using Firebase fallback search');
-        if (typeof Projects !== 'undefined') {
-          await Projects.searchProjects(query);
-        }
+
+      if (typeof Projects !== 'undefined') {
+        await Projects.searchProjects(query);
       }
-    }, 500); // Increased debounce for AI search
+    }, 400);
   },
 
   /**
@@ -145,15 +143,19 @@ const Search = {
    * Sort search results
    */
   sortResults(sortType) {
-    console.log('Sorting by:', sortType);
-    
-    this.showLoading();
-    
-    // Simulate sorting delay
-    setTimeout(() => {
-      this.hideLoading();
-      console.log('Results sorted by:', sortType);
-    }, 500);
+    if (typeof Projects === 'undefined' || !Projects.currentProjects || !Projects.currentProjects.length) return;
+    const container = document.getElementById('results-container');
+    if (!container) return;
+
+    let sorted = [...Projects.currentProjects];
+
+    if (sortType.includes('Newest')) {
+      sorted.sort((a, b) => (b.year || 0) - (a.year || 0));
+    } else if (sortType.includes('Oldest')) {
+      sorted.sort((a, b) => (a.year || 0) - (b.year || 0));
+    }
+
+    Projects.displayProjects(sorted, container);
   },
 
   /**

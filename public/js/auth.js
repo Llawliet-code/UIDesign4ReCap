@@ -77,6 +77,185 @@ const Auth = {
   },
 
   /**
+   * Show signup modal
+   */
+  showSignupModal() {
+    // Close login modal if open
+    const loginModal = document.getElementById('login-modal');
+    if (loginModal) loginModal.classList.add('hidden');
+
+    const modal = document.getElementById('signup-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        const firstInput = document.getElementById('signup-firstname');
+        if (firstInput) firstInput.focus();
+      }, 100);
+    }
+  },
+
+  /**
+   * Close signup modal
+   */
+  closeSignupModal() {
+    const modal = document.getElementById('signup-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      this.resetSignupForm();
+    }
+  },
+
+  /**
+   * Reset signup form
+   */
+  resetSignupForm() {
+    const form = document.getElementById('signup-form');
+    if (form) {
+      form.reset();
+      document.querySelectorAll('#signup-modal .form-error').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#signup-modal .form-input').forEach(el => el.classList.remove('error'));
+      const btn = document.getElementById('signup-submit');
+      if (btn) {
+        btn.disabled = false;
+        btn.querySelector('.btn-text').classList.remove('hidden');
+        btn.querySelector('.btn-spinner').classList.add('hidden');
+      }
+      const successDiv = document.getElementById('signup-success');
+      if (successDiv) successDiv.classList.add('hidden');
+      if (form) form.classList.remove('hidden');
+    }
+  },
+
+  /**
+   * Toggle signup password visibility
+   */
+  toggleSignupPassword(fieldId) {
+    const input = document.getElementById(fieldId);
+    const btn = input ? input.closest('.password-input-wrapper').querySelector('.password-icon') : null;
+    if (input && btn) {
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+  },
+
+  /**
+   * Validate signup form
+   */
+  validateSignupForm(data) {
+    let isValid = true;
+
+    const setError = (id, msg) => {
+      const input = document.getElementById(id);
+      const error = document.getElementById(id + '-error');
+      if (input) input.classList.add('error');
+      if (error) { error.textContent = msg; error.classList.remove('hidden'); }
+      isValid = false;
+    };
+    const clearError = (id) => {
+      const input = document.getElementById(id);
+      const error = document.getElementById(id + '-error');
+      if (input) input.classList.remove('error');
+      if (error) error.classList.add('hidden');
+    };
+
+    if (!data.firstName.trim()) {
+      setError('signup-firstname', 'First name is required');
+    } else { clearError('signup-firstname'); }
+
+    if (!data.lastName.trim()) {
+      setError('signup-lastname', 'Last name is required');
+    } else { clearError('signup-lastname'); }
+
+    if (!data.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      setError('signup-email', 'Please enter a valid email address');
+    } else { clearError('signup-email'); }
+
+    if (!data.password || data.password.length < 6) {
+      setError('signup-password', 'Password must be at least 6 characters');
+    } else { clearError('signup-password'); }
+
+    if (data.password !== data.confirmPassword) {
+      setError('signup-confirm-password', 'Passwords do not match');
+    } else {
+      const input = document.getElementById('signup-confirm-password');
+      const error = document.getElementById('signup-confirm-error');
+      if (input) input.classList.remove('error');
+      if (error) error.classList.add('hidden');
+    }
+
+    return isValid;
+  },
+
+  /**
+   * Handle signup form submission
+   */
+  async handleSignup(e) {
+    e.preventDefault();
+
+    const data = {
+      firstName: document.getElementById('signup-firstname').value,
+      lastName: document.getElementById('signup-lastname').value,
+      email: document.getElementById('signup-email').value,
+      studentId: document.getElementById('signup-student-id').value,
+      program: document.getElementById('signup-program').value,
+      password: document.getElementById('signup-password').value,
+      confirmPassword: document.getElementById('signup-confirm-password').value,
+    };
+
+    if (!this.validateSignupForm(data)) return;
+
+    // Set loading state
+    const btn = document.getElementById('signup-submit');
+    btn.disabled = true;
+    btn.querySelector('.btn-text').classList.add('hidden');
+    btn.querySelector('.btn-spinner').classList.remove('hidden');
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Create new user object
+    const newUser = {
+      role: 'student',
+      name: `${data.firstName} ${data.lastName}`,
+      id: data.studentId || `STU-${Date.now()}`,
+      program: data.program || 'N/A',
+      email: data.email,
+    };
+
+    // Register in demoUsers so they can log in immediately
+    this.demoUsers[data.email.toLowerCase()] = {
+      ...newUser,
+      password: data.password,
+    };
+
+    // Auto-login the new user
+    this.currentUser = newUser;
+    sessionStorage.setItem('ctureap_user', JSON.stringify(newUser));
+
+    // Show success
+    const form = document.getElementById('signup-form');
+    const successDiv = document.getElementById('signup-success');
+    if (form) form.classList.add('hidden');
+    if (successDiv) successDiv.classList.remove('hidden');
+
+    // Redirect to dashboard
+    setTimeout(() => {
+      this.closeSignupModal();
+      this.updateUIForLoggedInUser();
+      if (typeof Navigation !== 'undefined') {
+        Navigation.switchView('dashboard');
+      }
+    }, 1500);
+  },
+
+  /**
    * Reset login form
    */
   resetForm() {
@@ -348,14 +527,23 @@ const Auth = {
         roleBadge.textContent = `Admin — ${this.currentUser.department}`;
       }
     }
-    
-    // Update login button to show user name
-    const loginBtn = document.querySelector('[data-action="show-login"]');
-    if (loginBtn) {
-      loginBtn.textContent = this.currentUser.name.split(' ')[0];
-      loginBtn.setAttribute('data-action', 'show-user-menu');
-      loginBtn.setAttribute('aria-label', 'User menu');
+
+    // Switch nav: hide auth buttons, show user menu
+    const authButtons = document.getElementById('nav-auth-buttons');
+    const userMenu = document.getElementById('nav-user-menu');
+    const userAvatar = document.getElementById('nav-user-avatar');
+    const userName = document.getElementById('nav-user-name');
+
+    if (authButtons) {
+      authButtons.classList.add('hidden');
+      authButtons.style.display = 'none';
     }
+    if (userMenu) {
+      userMenu.classList.remove('hidden');
+      userMenu.style.display = '';
+    }
+    if (userAvatar) userAvatar.textContent = this.currentUser.name.charAt(0).toUpperCase();
+    if (userName) userName.textContent = this.currentUser.name.split(' ')[0];
     
     // Apply role-based access control
     this.applyRoleBasedAccess();
@@ -434,13 +622,23 @@ const Auth = {
     localStorage.removeItem('ctureap_user');
     sessionStorage.removeItem('ctureap_user');
     
-    // Reset UI
-    const loginBtn = document.querySelector('[data-action="show-user-menu"]');
-    if (loginBtn) {
-      loginBtn.textContent = 'Login';
-      loginBtn.setAttribute('data-action', 'show-login');
-      loginBtn.setAttribute('aria-label', 'Login to dashboard');
+    // Restore nav: show auth buttons, hide user menu
+    const authButtons = document.getElementById('nav-auth-buttons');
+    const userMenu = document.getElementById('nav-user-menu');
+    const userAvatar = document.getElementById('nav-user-avatar');
+    const userName = document.getElementById('nav-user-name');
+
+    if (authButtons) {
+      authButtons.classList.remove('hidden');
+      authButtons.style.display = '';
     }
+    if (userMenu) {
+      userMenu.classList.add('hidden');
+      userMenu.style.display = 'none';
+    }
+    // Clear user info
+    if (userAvatar) userAvatar.textContent = '';
+    if (userName) userName.textContent = '';
     
     // Go to landing page
     if (typeof Navigation !== 'undefined') {
@@ -452,16 +650,10 @@ const Auth = {
    * Check if user is already logged in
    */
   checkExistingSession() {
-    const storedUser = localStorage.getItem('ctureap_user') || sessionStorage.getItem('ctureap_user');
-    
-    if (storedUser) {
-      try {
-        this.currentUser = JSON.parse(storedUser);
-        this.updateUIForLoggedInUser();
-      } catch (e) {
-        console.error('Error parsing stored user:', e);
-      }
-    }
+    // Clear any stale sessions on page load
+    localStorage.removeItem('ctureap_user');
+    sessionStorage.removeItem('ctureap_user');
+    this.currentUser = null;
   },
 
   /**
@@ -478,10 +670,16 @@ const Auth = {
     // Check for existing session
     this.checkExistingSession();
     
-    // Setup form submission
+    // Setup login form submission
     const form = document.getElementById('login-form');
     if (form) {
       form.addEventListener('submit', (e) => this.handleLogin(e));
+    }
+
+    // Setup signup form submission
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+      signupForm.addEventListener('submit', (e) => this.handleSignup(e));
     }
     
     // Close login modal on overlay click
@@ -490,6 +688,16 @@ const Auth = {
       loginModal.addEventListener('click', (e) => {
         if (e.target === loginModal) {
           this.closeLoginModal();
+        }
+      });
+    }
+
+    // Close signup modal on overlay click
+    const signupModal = document.getElementById('signup-modal');
+    if (signupModal) {
+      signupModal.addEventListener('click', (e) => {
+        if (e.target === signupModal) {
+          this.closeSignupModal();
         }
       });
     }
@@ -509,6 +717,9 @@ const Auth = {
       if (e.key === 'Escape') {
         if (loginModal && !loginModal.classList.contains('hidden')) {
           this.closeLoginModal();
+        }
+        if (signupModal && !signupModal.classList.contains('hidden')) {
+          this.closeSignupModal();
         }
         if (logoutModal && !logoutModal.classList.contains('hidden')) {
           this.closeLogoutModal();
