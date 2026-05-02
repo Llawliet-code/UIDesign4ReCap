@@ -51,7 +51,7 @@ function toggleTheme() {
 
 /**
  * Switches the active view/tab in the app with ARIA support
- * @param {string} v - View name: 'landing' | 'dashboard' | 'detail' | 'chatbot'
+ * @param {string} v - View name: 'landing' | 'detail' | 'chatbot' | 'dashboard'
  */
 function switchView(v) {
   // Update views
@@ -75,7 +75,7 @@ function switchView(v) {
   }
 
   // Activate selected tab
-  const idx = { landing: 0, dashboard: 1, detail: 2, chatbot: 3 }[v];
+  const idx = { landing: 0, detail: 1,  chatbot: 2,  dashboard: 3}[v];
   const tabs = document.querySelectorAll('.tab');
   if (tabs[idx]) {
     tabs[idx].classList.add('active');

@@ -67,3 +67,22 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Meilisearch executable and data
+*.exe
+meilisearch-windows-amd64.exe
+data.ms/
+
+# Temporary folders
+dumps/
+TempUICAPSTONEREP/
+
+# Test files
+test-*.js
+test-*.html
+
+# Documentation
+*.docx
+
+# IDE
+.vscode/

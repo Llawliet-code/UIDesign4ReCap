@@ -46,16 +46,18 @@ const Chat = {
   /**
    * Send message in floating chat
    */
-  sendMessage() {
+  async sendMessage() {
     const input = document.getElementById('chat-input');
     const messages = document.getElementById('chat-messages');
 
     if (!input || !messages || !input.value.trim()) return;
 
+    const userMessage = input.value.trim();
+
     // Append user message
     const userMsg = document.createElement('div');
     userMsg.className = 'msg msg-user';
-    userMsg.textContent = input.value;
+    userMsg.textContent = userMessage;
     userMsg.setAttribute('role', 'log');
     messages.appendChild(userMsg);
 
@@ -65,32 +67,55 @@ const Chat = {
     // Show typing indicator
     this.showTyping(messages);
     
-    // Simulate bot response
-    setTimeout(() => {
+    try {
+      // Get AI response
+      const response = await AIService.sendMessage(userMessage);
+      
       this.hideTyping(messages);
       
       const botMsg = document.createElement('div');
       botMsg.className = 'msg msg-bot';
-      botMsg.textContent = "Let me search the repository for you... I'll find the most relevant capstone projects matching your query.";
+      botMsg.textContent = response.message;
       botMsg.setAttribute('role', 'log');
+      
+      // Add provider badge
+      const badge = document.createElement('span');
+      badge.className = 'ai-provider-badge';
+      badge.textContent = response.provider === 'mistral' ? '🤖 Mistral' : '✨ Gemini';
+      badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
+      botMsg.appendChild(badge);
+      
       messages.appendChild(botMsg);
+      messages.scrollTop = messages.scrollHeight;
+      
+    } catch (error) {
+      this.hideTyping(messages);
+      
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'msg msg-bot';
+      errorMsg.textContent = 'Sorry, I\'m having trouble connecting right now. Please try again in a moment.';
+      errorMsg.setAttribute('role', 'log');
+      messages.appendChild(errorMsg);
       
       messages.scrollTop = messages.scrollHeight;
-    }, 1200);
+      console.error('Chat error:', error);
+    }
   },
 
   /**
    * Send message in inline chat
    */
-  sendInlineMessage() {
+  async sendInlineMessage() {
     const input = document.getElementById('inline-chat-input');
     const messages = document.getElementById('inline-chat-messages');
 
     if (!input || !messages || !input.value.trim()) return;
 
+    const userMessage = input.value.trim();
+
     const userMsg = document.createElement('div');
     userMsg.className = 'msg msg-user';
-    userMsg.textContent = input.value;
+    userMsg.textContent = userMessage;
     messages.appendChild(userMsg);
 
     input.value = '';
@@ -98,27 +123,52 @@ const Chat = {
     // Show typing indicator
     const typingIndicator = document.getElementById('typing-indicator');
     if (typingIndicator) {
-      typingIndicator.style.display = 'flex';
+      typingIndicator.classList.remove('hidden');
     }
 
-    setTimeout(() => {
+    try {
+      // Get AI response
+      const response = await AIService.sendMessage(userMessage);
+      
       // Hide typing indicator
       if (typingIndicator) {
-        typingIndicator.style.display = 'none';
+        typingIndicator.classList.add('hidden');
       }
       
       const botMsg = document.createElement('div');
       botMsg.className = 'msg msg-bot';
-      botMsg.textContent = "I'm searching the repository for that. I'll surface the most relevant capstone studies for you right away!";
+      botMsg.textContent = response.message;
+      
+      // Add provider badge
+      const badge = document.createElement('span');
+      badge.className = 'ai-provider-badge';
+      badge.textContent = response.provider === 'mistral' ? '🤖 Mistral' : '✨ Gemini';
+      badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
+      botMsg.appendChild(badge);
+      
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
-    }, 1000);
+      
+    } catch (error) {
+      // Hide typing indicator
+      if (typingIndicator) {
+        typingIndicator.classList.add('hidden');
+      }
+      
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'msg msg-bot';
+      errorMsg.textContent = 'Sorry, I\'m having trouble connecting right now. Please try again in a moment.';
+      messages.appendChild(errorMsg);
+      messages.scrollTop = messages.scrollHeight;
+      
+      console.error('Chat error:', error);
+    }
   },
 
   /**
    * Handle suggestion chip click
    */
-  sendSuggestion(button, text) {
+  async sendSuggestion(button, text) {
     const suggestions = document.getElementById('inline-suggestions');
     const messages = document.getElementById('inline-chat-messages');
 
@@ -136,21 +186,46 @@ const Chat = {
     // Show typing indicator
     const typingIndicator = document.getElementById('typing-indicator');
     if (typingIndicator) {
-      typingIndicator.style.display = 'flex';
+      typingIndicator.classList.remove('hidden');
     }
 
-    setTimeout(() => {
+    try {
+      // Get AI response
+      const response = await AIService.sendMessage(text);
+      
       // Hide typing indicator
       if (typingIndicator) {
-        typingIndicator.style.display = 'none';
+        typingIndicator.classList.add('hidden');
       }
       
       const botMsg = document.createElement('div');
       botMsg.className = 'msg msg-bot';
-      botMsg.textContent = this.suggestionResponses[text] || 'Great question! Let me look that up in the repository for you.';
+      botMsg.textContent = response.message;
+      
+      // Add provider badge
+      const badge = document.createElement('span');
+      badge.className = 'ai-provider-badge';
+      badge.textContent = response.provider === 'mistral' ? '🤖 Mistral' : '✨ Gemini';
+      badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
+      botMsg.appendChild(badge);
+      
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
-    }, 1000);
+      
+    } catch (error) {
+      // Hide typing indicator
+      if (typingIndicator) {
+        typingIndicator.classList.add('hidden');
+      }
+      
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'msg msg-bot';
+      errorMsg.textContent = 'Sorry, I\'m having trouble connecting right now. Please try again in a moment.';
+      messages.appendChild(errorMsg);
+      messages.scrollTop = messages.scrollHeight;
+      
+      console.error('Chat error:', error);
+    }
   },
 
   /**

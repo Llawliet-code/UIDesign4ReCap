@@ -33,6 +33,13 @@ const Auth = {
       name: 'Ms. Maria Santos',
       id: 'LIB-001',
       department: 'Library Services'
+    },
+    'admin@ctu.edu.ph': {
+      password: 'admin123',
+      role: 'admin',
+      name: 'Admin User',
+      id: 'ADM-001',
+      department: 'System Administration'
     }
   },
 
@@ -248,10 +255,34 @@ const Auth = {
       // Redirect to dashboard after 1.5 seconds
       setTimeout(() => {
         this.closeLoginModal();
+        this.updateUIForLoggedInUser();
+        
         if (typeof Navigation !== 'undefined') {
           Navigation.switchView('dashboard');
+          
+          // Auto-select the correct role tab based on user role
+          setTimeout(() => {
+            const roleTabs = document.querySelectorAll('.role-tab');
+            let targetTab = null;
+            
+            // Find the appropriate tab for the user's role
+            roleTabs.forEach(tab => {
+              const tabRole = tab.dataset.role;
+              if (tabRole === this.currentUser.role && tab.style.display !== 'none') {
+                targetTab = tab;
+              }
+            });
+            
+            // If user's role tab is not found or hidden, use first visible tab
+            if (!targetTab) {
+              targetTab = document.querySelector('.role-tab:not([style*="display: none"])');
+            }
+            
+            if (targetTab) {
+              Navigation.switchRole(targetTab, targetTab.dataset.role);
+            }
+          }, 100);
         }
-        this.updateUIForLoggedInUser();
       }, 1500);
       
     } else {
@@ -313,6 +344,8 @@ const Auth = {
         roleBadge.textContent = `Adviser — ${this.currentUser.department}`;
       } else if (this.currentUser.role === 'librarian') {
         roleBadge.textContent = `Librarian — ${this.currentUser.department}`;
+      } else if (this.currentUser.role === 'admin') {
+        roleBadge.textContent = `Admin — ${this.currentUser.department}`;
       }
     }
     
@@ -323,6 +356,74 @@ const Auth = {
       loginBtn.setAttribute('data-action', 'show-user-menu');
       loginBtn.setAttribute('aria-label', 'User menu');
     }
+    
+    // Apply role-based access control
+    this.applyRoleBasedAccess();
+  },
+
+  /**
+   * Apply role-based access control to dashboard tabs
+   */
+  applyRoleBasedAccess() {
+    if (!this.currentUser) return;
+    
+    const userRole = this.currentUser.role;
+    const roleTabs = document.querySelectorAll('.role-tab');
+    
+    roleTabs.forEach(tab => {
+      const allowedRoles = tab.dataset.allowedRoles?.split(',') || [];
+      
+      if (allowedRoles.includes(userRole)) {
+        // User has access - show tab
+        tab.style.display = '';
+        tab.style.pointerEvents = '';
+        tab.style.opacity = '';
+      } else {
+        // User doesn't have access - hide tab
+        tab.style.display = 'none';
+      }
+    });
+    
+    // Ensure the active tab is one the user has access to
+    const activeTab = document.querySelector('.role-tab.active');
+    if (activeTab && activeTab.style.display === 'none') {
+      // Find first accessible tab and activate it
+      const firstAccessibleTab = document.querySelector('.role-tab[style=""], .role-tab:not([style])');
+      if (firstAccessibleTab) {
+        activeTab.classList.remove('active');
+        firstAccessibleTab.classList.add('active');
+        
+        // Switch to that panel
+        const role = firstAccessibleTab.dataset.role;
+        if (typeof Navigation !== 'undefined') {
+          Navigation.switchRole(firstAccessibleTab, role);
+        }
+      }
+    }
+  },
+
+  /**
+   * Show logout confirmation modal
+   */
+  showLogoutModal() {
+    document.getElementById('logout-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  },
+
+  /**
+   * Close logout modal
+   */
+  closeLogoutModal() {
+    document.getElementById('logout-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+  },
+
+  /**
+   * Confirm logout
+   */
+  confirmLogout() {
+    this.closeLogoutModal();
+    this.logout();
   },
 
   /**
@@ -383,20 +484,35 @@ const Auth = {
       form.addEventListener('submit', (e) => this.handleLogin(e));
     }
     
-    // Close modal on overlay click
-    const modal = document.getElementById('login-modal');
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+    // Close login modal on overlay click
+    const loginModal = document.getElementById('login-modal');
+    if (loginModal) {
+      loginModal.addEventListener('click', (e) => {
+        if (e.target === loginModal) {
           this.closeLoginModal();
         }
       });
     }
     
-    // Close modal on Escape key
+    // Close logout modal on overlay click
+    const logoutModal = document.getElementById('logout-modal');
+    if (logoutModal) {
+      logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) {
+          this.closeLogoutModal();
+        }
+      });
+    }
+    
+    // Close modals on Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-        this.closeLoginModal();
+      if (e.key === 'Escape') {
+        if (loginModal && !loginModal.classList.contains('hidden')) {
+          this.closeLoginModal();
+        }
+        if (logoutModal && !logoutModal.classList.contains('hidden')) {
+          this.closeLogoutModal();
+        }
       }
     });
     

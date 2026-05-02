@@ -1,4 +1,4 @@
-/**
+  /**
  * Navigation Module
  * Handles view switching and tab navigation
  */
@@ -14,7 +14,7 @@ const Navigation = {
       view.setAttribute('aria-hidden', 'true');
     });
     
-    // Update tabs
+    // Update tabs - remove active from all
     document.querySelectorAll('.tab').forEach(tab => {
       tab.classList.remove('active');
       tab.setAttribute('aria-selected', 'false');
@@ -28,10 +28,32 @@ const Navigation = {
       activeView.setAttribute('aria-hidden', 'false');
     }
 
-    // Activate selected tab
-    const tabIndex = { landing: 0, dashboard: 1, detail: 2, chatbot: 3 }[viewName];
+    // Activate selected tab based on view name
     const tabs = document.querySelectorAll('.tab');
-    if (tabs[tabIndex]) {
+    let tabIndex = -1;
+    
+    // Map view names to tab indices (matching HTML order)
+    switch(viewName) {
+      case 'landing':
+        tabIndex = 0;
+        break;
+      case 'detail':
+        tabIndex = 1;
+        // Load project details when switching to detail view
+        if (typeof Projects !== 'undefined') {
+          Projects.loadDetailView();
+        }
+        break;
+      case 'chatbot':
+        tabIndex = 2;
+        break;
+      case 'dashboard':
+        tabIndex = 3;
+        break;
+    }
+    
+    // Activate the correct tab
+    if (tabIndex >= 0 && tabs[tabIndex]) {
       tabs[tabIndex].classList.add('active');
       tabs[tabIndex].setAttribute('aria-selected', 'true');
       tabs[tabIndex].setAttribute('tabindex', '0');
@@ -53,15 +75,33 @@ const Navigation = {
    * Switch dashboard role tabs
    */
   switchRole(element, role) {
+    // Check if user has permission to access this role
+    if (typeof Auth !== 'undefined' && Auth.currentUser) {
+      const allowedRoles = element.dataset.allowedRoles?.split(',') || [];
+      const userRole = Auth.currentUser.role;
+      
+      if (!allowedRoles.includes(userRole)) {
+        console.warn(`Access denied: User role '${userRole}' cannot access '${role}' panel`);
+        return;
+      }
+    }
+    
     document.querySelectorAll('.role-tab').forEach(tab => tab.classList.remove('active'));
     element.classList.add('active');
 
-    ['student', 'adviser', 'librarian'].forEach(r => {
+    ['student', 'adviser', 'librarian', 'admin'].forEach(r => {
       const panel = document.getElementById(`dash-${r}`);
       if (panel) {
-        panel.style.display = (r === role) ? 'block' : 'none';
+        panel.classList.toggle('hidden', r !== role);
       }
     });
+    
+    // Load data based on role
+    if (role === 'admin' && typeof Admin !== 'undefined') {
+      Admin.loadProjects();
+    } else if (role === 'librarian' && typeof Librarian !== 'undefined') {
+      Librarian.loadRecentUploads();
+    }
   },
 
   /**
@@ -69,6 +109,7 @@ const Navigation = {
    */
   setupKeyboardNavigation() {
     const tabs = document.querySelectorAll('.tab');
+    const viewNames = ['landing', 'detail', 'chatbot', 'dashboard'];
     
     tabs.forEach((tab, index) => {
       tab.addEventListener('keydown', (e) => {
@@ -90,8 +131,15 @@ const Navigation = {
           return;
         }
         
-        tabs[newIndex].click();
-        tabs[newIndex].focus();
+        this.switchView(viewNames[newIndex]);
+        
+        // Focus the new tab after a short delay
+        setTimeout(() => {
+          const updatedTabs = document.querySelectorAll('.tab');
+          if (updatedTabs[newIndex]) {
+            updatedTabs[newIndex].focus();
+          }
+        }, 50);
       });
     });
   },
@@ -102,20 +150,38 @@ const Navigation = {
   init() {
     this.setupKeyboardNavigation();
     
-    // Setup tab click handlers
-    document.querySelectorAll('.tab').forEach((tab, index) => {
-      const views = ['landing', 'dashboard', 'detail', 'chatbot'];
-      tab.addEventListener('click', () => this.switchView(views[index]));
+    // Setup tab click handlers with proper view mapping
+    const tabs = document.querySelectorAll('.tab');
+    const viewNames = ['landing', 'detail', 'chatbot', 'dashboard'];
+    
+    tabs.forEach((tab, index) => {
+      // Remove any existing click handlers
+      const newTab = tab.cloneNode(true);
+      tab.parentNode.replaceChild(newTab, tab);
+      
+      // Add new click handler
+      newTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Tab clicked:', viewNames[index]);
+        this.switchView(viewNames[index]);
+      });
     });
 
     // Setup role tab handlers
     document.querySelectorAll('.role-tab').forEach(tab => {
       tab.addEventListener('click', function() {
-        const role = this.textContent.toLowerCase().includes('student') ? 'student' :
-                     this.textContent.toLowerCase().includes('adviser') ? 'adviser' : 'librarian';
+        const text = this.textContent.toLowerCase();
+        let role = 'student';
+        
+        if (text.includes('adviser')) role = 'adviser';
+        else if (text.includes('librarian')) role = 'librarian';
+        else if (text.includes('admin')) role = 'admin';
+        
         Navigation.switchRole(this, role);
       });
     });
+    
+    console.log('✓ Navigation initialized');
   }
 };
 

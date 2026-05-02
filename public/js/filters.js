@@ -7,25 +7,38 @@ const Filters = {
   /**
    * Update filters and show active filter chips
    */
-  update() {
+  async update() {
     const activeFilters = [];
+    const filters = {};
     
     // Collect all checked filters
     document.querySelectorAll('.filter-content input[type="checkbox"]:checked').forEach(checkbox => {
       const label = document.querySelector(`label[for="${checkbox.id}"]`);
       if (label) {
+        const filterText = label.textContent.trim();
         activeFilters.push({
           id: checkbox.id,
-          text: label.textContent.trim()
+          text: filterText
         });
+        
+        // Determine filter type and add to filters object
+        if (checkbox.id.startsWith('y')) {
+          filters.year = parseInt(filterText);
+        } else if (checkbox.id.startsWith('p')) {
+          filters.program = filterText;
+        } else if (checkbox.id.startsWith('t')) {
+          filters.topic = filterText;
+        }
       }
     });
     
     // Update filter chips display
     this.updateChips(activeFilters);
     
-    // Update results count
-    this.updateResultsCount(activeFilters.length);
+    // Apply filters to projects
+    if (typeof Projects !== 'undefined') {
+      await Projects.loadProjects(filters);
+    }
   },
 
   /**
