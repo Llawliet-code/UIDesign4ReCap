@@ -171,12 +171,7 @@ const Search = {
     this.useNaturalLanguage = !isChecked;
     toggle.setAttribute('aria-checked', this.useNaturalLanguage);
     
-    // Visual feedback
-    const pill = toggle.querySelector('.toggle-pill');
-    if (pill) {
-      pill.style.background = this.useNaturalLanguage ? 'var(--ctu-orange)' : 'var(--text-hint)';
-    }
-    
+    // Visual feedback — CSS handles pill colour and dot position via aria-checked
     const label = toggle.querySelector('.toggle-label');
     if (label) {
       label.textContent = this.useNaturalLanguage ? 'AI Semantic Search' : 'Keyword Search';
