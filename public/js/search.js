@@ -68,7 +68,7 @@ const Search = {
         this.showNoResults(container, query);
       } else {
         if (typeof Projects !== 'undefined') {
-          Projects.displayProjects(results, container);
+          await Projects.displayProjects(results, container);
           Projects.updateResultsCount(results.length);
         }
       }

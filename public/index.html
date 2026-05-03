@@ -252,40 +252,13 @@
     <!-- Student Panel -->
     <div id="dash-student">
       <div class="dash-grid">
-        <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">Saved Projects</div></div>
-        <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Recent Searches</div></div>
-        <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Cited Works</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-saved-count">0</div><div class="stat-label">Saved Projects</div></div>
+        <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Recent Searches</div></div>
+        <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Cited Works</div></div>
       </div>
       <div class="text-md font-medium text-primary mb-3">My Saved Research</div>
-      <div class="saved-grid">
-        <div class="saved-card">
-          <div class="saved-title">Smart Attendance Monitoring System Using Facial Recognition</div>
-          <div class="saved-meta">Reyes et al. · BSIT · 2024</div>
-          <div class="saved-remove">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
-          </div>
-        </div>
-        <div class="saved-card">
-          <div class="saved-title">IoT-Based Soil Moisture Detection for Precision Agriculture</div>
-          <div class="saved-meta">Fernandez et al. · BSIT · 2024</div>
-          <div class="saved-remove">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
-          </div>
-        </div>
-        <div class="saved-card">
-          <div class="saved-title">Mobile-Based Flood Warning System for Coastal Barangays</div>
-          <div class="saved-meta">Abad et al. · BSIT · 2023</div>
-          <div class="saved-remove">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
-          </div>
-        </div>
-        <div class="saved-card">
-          <div class="saved-title">Automated Grading System Using NLP for Essay Evaluation</div>
-          <div class="saved-meta">Cruz et al. · BSIT · 2022</div>
-          <div class="saved-remove">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
-          </div>
-        </div>
+      <div class="saved-grid" id="saved-projects-grid">
+        <!-- Dynamically populated -->
       </div>
     </div>
 
@@ -298,7 +271,6 @@
           class="validation-input"
           type="text"
           placeholder="Enter proposed project title..."
-          value="Machine Learning-Based Crop Disease Detection Using Image Processing for Farmers in Northern Cebu"
         />
         <button class="btn btn-blue" data-action="validate">Check Originality →</button>
         <div class="val-result" id="val-result">

@@ -341,6 +341,11 @@ const Auth = {
 
     this.currentUser = null;
 
+    // Clear saved project cache so next user starts fresh
+    if (typeof Projects !== 'undefined') {
+      Projects.savedProjectIds = new Set();
+    }
+
     const authButtons = document.getElementById('nav-auth-buttons');
     const userMenu = document.getElementById('nav-user-menu');
     const userAvatar = document.getElementById('nav-user-avatar');
@@ -361,9 +366,7 @@ const Auth = {
   // ─── UI UPDATE ────────────────────────────────────────────────────────────
 
   updateUIForLoggedInUser() {
-    if (!this.currentUser) return;
-
-    const welcomeSpan = document.querySelector('.dash-welcome span');
+    if (!this.currentUser) return;    const welcomeSpan = document.querySelector('.dash-welcome span');
     if (welcomeSpan) welcomeSpan.textContent = this.currentUser.name;
 
     const roleBadge = document.querySelector('.role-badge');
@@ -390,6 +393,12 @@ const Auth = {
     if (dashTab) dashTab.style.display = '';
 
     this.applyRoleBasedAccess();
+
+    // Load saved projects so dashboard is populated on every page load
+    if (typeof Projects !== 'undefined') {
+      Projects.loadSavedIds();      // fetches IDs + patches all visible save buttons
+      Projects.loadSavedProjects(); // populates dashboard grid
+    }
   },
 
   applyRoleBasedAccess() {

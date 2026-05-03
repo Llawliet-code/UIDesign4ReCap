@@ -150,21 +150,33 @@ const Database = {
   },
 
   /**
-   * Fetch user's saved projects
+   * Fetch user's saved projects — returns full project objects
    */
   async fetchSavedProjects(userId) {
     try {
       const snapshot = await db.collection('savedProjects')
         .where('userId', '==', userId)
         .get();
-      
-      const savedIds = [];
+
+      if (snapshot.empty) return [];
+
+      // Collect project IDs
+      const projectIds = [];
       snapshot.forEach(doc => {
-        savedIds.push(doc.data().projectId);
+        projectIds.push(doc.data().projectId);
       });
-      
-      return savedIds;
-      
+
+      // Fetch full project data for each ID in parallel
+      const fetches = projectIds.map(pid =>
+        db.collection('projects').doc(pid).get().then(projDoc => {
+          if (projDoc.exists) return { id: projDoc.id, ...projDoc.data() };
+          return null;
+        })
+      );
+
+      const results = await Promise.all(fetches);
+      return results.filter(Boolean);
+
     } catch (error) {
       console.error('Error fetching saved projects:', error);
       return [];
@@ -172,10 +184,22 @@ const Database = {
   },
 
   /**
-   * Save project for user
+   * Save project for user — prevents duplicates
    */
   async saveProject(userId, projectId) {
     try {
+      // Check if already saved to prevent duplicates
+      const existing = await db.collection('savedProjects')
+        .where('userId', '==', userId)
+        .where('projectId', '==', projectId)
+        .limit(1)
+        .get();
+
+      if (!existing.empty) {
+        console.log('Project already saved, skipping duplicate');
+        return true;
+      }
+
       await db.collection('savedProjects').add({
         userId,
         projectId,

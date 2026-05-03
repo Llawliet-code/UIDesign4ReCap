@@ -6,6 +6,7 @@
 const Projects = {
   currentProjects: [],
   currentFilters: {},
+  savedProjectIds: new Set(), // tracks which project IDs the current user has saved
 
   /**
    * Load and display projects
@@ -34,7 +35,7 @@ const Projects = {
       if (projects.length === 0) {
         this.showEmptyState(container);
       } else {
-        this.displayProjects(projects, container);
+        await this.displayProjects(projects, container);
       }
       
       // Update results count
@@ -50,8 +51,17 @@ const Projects = {
   /**
    * Display projects in cards
    */
-  displayProjects(projects, container) {
+  async displayProjects(projects, container) {
     container.innerHTML = projects.map(project => this.createProjectCard(project)).join('');
+    // Patch buttons after render — handles the case where savedProjectIds
+    // loaded after cards were already drawn (e.g. on page refresh)
+    if (Auth.currentUser) {
+      if (this.savedProjectIds.size === 0) {
+        await this.loadSavedIds(); // also calls _patchSaveButtons internally
+      } else {
+        this._patchSaveButtons();
+      }
+    }
   },
 
   /**
@@ -78,8 +88,11 @@ const Projects = {
           ${allTags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
         </div>
         <div class="result-actions">
-          <button class="save-btn ripple" data-action="save-project" data-project-id="${project.id}" aria-label="Save this project" aria-pressed="false">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save
+          <button class="save-btn ripple" data-action="save-project" data-project-id="${project.id}" aria-label="Save this project" aria-pressed="${this.savedProjectIds.has(project.id)}">
+            ${this.savedProjectIds.has(project.id)
+              ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved`
+              : `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save`
+            }
           </button>
           <button class="view-btn ripple" data-action="view-project" data-project-id="${project.id}" aria-label="View project details">
             View Details →
@@ -202,7 +215,7 @@ const Projects = {
           </div>
         `;
       } else {
-        this.displayProjects(results, container);
+        await this.displayProjects(results, container);
       }
       
       // Update count
@@ -212,6 +225,32 @@ const Projects = {
       console.error('❌ Error searching projects:', error);
       if (loadingSkeleton) loadingSkeleton.classList.add('hidden');
       this.showErrorState(container);
+    }
+  },
+
+  /**
+   * View project from saved research (fetches from DB since it may not be in currentProjects)
+   */
+  async viewSavedProject(projectId) {
+    try {
+      // Try currentProjects first (faster)
+      let project = this.currentProjects.find(p => p.id === projectId);
+
+      // Fall back to Firestore fetch
+      if (!project) {
+        project = await Database.fetchProjectById(projectId);
+      }
+
+      if (!project) return;
+
+      sessionStorage.setItem('currentProject', JSON.stringify(project));
+      this.populateDetailView(project);
+
+      if (typeof Navigation !== 'undefined') {
+        Navigation.switchView('detail');
+      }
+    } catch (error) {
+      console.error('Error viewing saved project:', error);
     }
   },
 
@@ -313,16 +352,141 @@ const Projects = {
     try {
       if (isSaved) {
         await Database.unsaveProject(Auth.currentUser.id, projectId);
+        this.savedProjectIds.delete(projectId);
         button.setAttribute('aria-pressed', 'false');
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save';
       } else {
         await Database.saveProject(Auth.currentUser.id, projectId);
+        this.savedProjectIds.add(projectId);
         button.setAttribute('aria-pressed', 'true');
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved';
       }
+      // Refresh dashboard saved list
+      this.loadSavedProjects();
     } catch (error) {
       console.error('Error toggling save:', error);
       alert('Error saving project. Please try again.');
+    }
+  },
+
+  /**
+   * Load saved project IDs into cache, then patch all visible save buttons
+   */
+  async loadSavedIds() {
+    if (!Auth.currentUser) return;
+    try {
+      const snapshot = await db.collection('savedProjects')
+        .where('userId', '==', Auth.currentUser.id)
+        .get();
+      this.savedProjectIds = new Set();
+      snapshot.forEach(doc => this.savedProjectIds.add(doc.data().projectId));
+      // Patch any already-rendered buttons on the page
+      this._patchSaveButtons();
+    } catch (e) {
+      console.error('Error loading saved IDs:', e);
+    }
+  },
+
+  /**
+   * Walk all visible save buttons and set their state from savedProjectIds
+   */
+  _patchSaveButtons() {
+    const savedIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+    const unsavedIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+
+    document.querySelectorAll('[data-action="save-project"]').forEach(btn => {
+      const pid = btn.dataset.projectId;
+      if (this.savedProjectIds.has(pid)) {
+        btn.setAttribute('aria-pressed', 'true');
+        btn.innerHTML = savedIcon + 'Saved';
+      } else {
+        btn.setAttribute('aria-pressed', 'false');
+        btn.innerHTML = unsavedIcon + 'Save';
+      }
+    });
+  },
+
+  /**
+   * Load saved projects and render them in the dashboard
+   */
+  async loadSavedProjects() {
+    if (!Auth.currentUser) return;
+
+    const grid = document.getElementById('saved-projects-grid');
+    const statCount = document.getElementById('stat-saved-count');
+    if (!grid) return;
+
+    grid.innerHTML = '<p class="text-secondary text-md">Loading...</p>';
+
+    try {
+      const saved = await Database.fetchSavedProjects(Auth.currentUser.id);
+
+      if (statCount) statCount.textContent = saved.length;
+
+      if (saved.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3 class="empty-title">No Saved Research Yet</h3>
+            <p class="empty-text">Go to the Search page and click Save on any project.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = saved.map(project => {
+        const authors = Array.isArray(project.authors) ? project.authors[0] + ' et al.' : 'Unknown';
+        return `
+          <div class="saved-card" data-project-id="${this.escapeHtml(String(project.id))}">
+            <div class="saved-title">${this.escapeHtml(project.title)}</div>
+            <div class="saved-meta">${this.escapeHtml(authors)} · ${this.escapeHtml(project.program || '')} · ${project.year || ''}</div>
+            <div class="saved-actions" style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+              <button class="view-btn ripple" data-action="view-saved-project" data-project-id="${this.escapeHtml(String(project.id))}" aria-label="View project details">
+                View Details →
+              </button>
+              <div class="saved-remove" data-action="remove-saved" data-project-id="${this.escapeHtml(String(project.id))}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+    } catch (error) {
+      console.error('Error loading saved projects:', error);
+      grid.innerHTML = '<p class="text-secondary text-md">Failed to load saved projects.</p>';
+    }
+  },
+
+  /**
+   * Remove a saved project from the dashboard
+   */
+  async removeSavedProject(projectId, element) {
+    if (!Auth.currentUser) return;
+
+    const card = element.closest('.saved-card');
+    if (card) card.style.opacity = '0.4';
+
+    try {
+      await Database.unsaveProject(Auth.currentUser.id, projectId);
+      this.savedProjectIds.delete(projectId);
+
+      // Flip the Save button back on the search page if it's visible
+      const saveBtn = document.querySelector(
+        `[data-action="save-project"][data-project-id="${projectId}"]`
+      );
+      if (saveBtn) {
+        saveBtn.setAttribute('aria-pressed', 'false');
+        saveBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save`;
+      }
+
+      // Refresh the dashboard grid
+      await this.loadSavedProjects();
+
+    } catch (error) {
+      console.error('Error removing saved project:', error);
+      if (card) card.style.opacity = '1';
+      alert('Could not remove project. Please try again.');
     }
   },
 
@@ -355,16 +519,28 @@ const Projects = {
     // Setup event delegation for project actions
     document.addEventListener('click', (e) => {
       const viewBtn = e.target.closest('[data-action="view-project"]');
+      const viewSavedBtn = e.target.closest('[data-action="view-saved-project"]');
       const saveBtn = e.target.closest('[data-action="save-project"]');
+      const removeBtn = e.target.closest('[data-action="remove-saved"]');
       
       if (viewBtn) {
         const projectId = viewBtn.dataset.projectId;
         this.viewProject(projectId);
       }
+
+      if (viewSavedBtn) {
+        const projectId = viewSavedBtn.dataset.projectId;
+        this.viewSavedProject(projectId);
+      }
       
       if (saveBtn) {
         const projectId = saveBtn.dataset.projectId;
         this.toggleSaveProject(projectId, saveBtn);
+      }
+
+      if (removeBtn) {
+        const projectId = removeBtn.dataset.projectId;
+        this.removeSavedProject(projectId, removeBtn);
       }
     });
     

@@ -1151,6 +1151,19 @@ body.theme-transitioning {
   color: var(--ctu-blue);
 }
 
+/* Saved state — orange highlight */
+.save-btn[aria-pressed="true"] {
+  background: var(--ctu-orange-light);
+  border-color: var(--ctu-orange);
+  color: var(--ctu-orange);
+}
+
+.save-btn[aria-pressed="true"]:hover {
+  background: var(--ctu-orange);
+  color: #fff;
+  border-color: var(--ctu-orange);
+}
+
 .view-btn {
   background: var(--ctu-blue);
   color: #fff;
@@ -1487,6 +1500,7 @@ body.theme-transitioning {
   font-size: 11px;
   color: var(--ctu-orange);
   margin-top: 6px;
+  margin-left: 6px;
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }

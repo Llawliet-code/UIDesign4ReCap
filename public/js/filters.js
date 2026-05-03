@@ -102,7 +102,7 @@ const Filters = {
       if (projects.length === 0) {
         Projects.showEmptyState(container);
       } else {
-        Projects.displayProjects(projects, container);
+        await Projects.displayProjects(projects, container);
       }
 
       Projects.updateResultsCount(projects.length);
