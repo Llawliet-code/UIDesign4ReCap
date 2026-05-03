@@ -85,16 +85,34 @@ const Filters = {
     if (loadingSkeleton) loadingSkeleton.classList.remove('hidden');
 
     try {
-      // Fetch all projects (Firestore doesn't support multi-value OR filters natively)
-      let projects = await Database.fetchProjects({});
-
-      // Client-side filtering for multi-value support
-      projects = this.filterProjects(projects, this.activeFilters);
-
-      // Also apply search bar query if present
       const searchQuery = document.getElementById('main-search')?.value.trim();
-      if (searchQuery) {
-        projects = this.keywordFilter(projects, searchQuery);
+      const hasFilters = this.activeFilters.years.length > 0 ||
+                         this.activeFilters.programs.length > 0 ||
+                         this.activeFilters.topics.length > 0 ||
+                         this.activeFilters.keyword;
+
+      let projects;
+
+      // Use Groq AI semantic search when there's a search query and no sidebar filters
+      if (searchQuery && !hasFilters &&
+          typeof GroqService !== 'undefined' && !GroqService.useFallback &&
+          typeof Search !== 'undefined' && Search.useNaturalLanguage) {
+
+        if (loadingSkeleton) loadingSkeleton.classList.remove('hidden');
+
+        // Fetch all projects for AI to rank
+        const allProjects = await Database.fetchProjects({});
+        GroqService.updateProjectsCache(allProjects);
+        projects = await GroqService.semanticSearch(searchQuery, allProjects);
+
+      } else {
+        // Fetch all projects then apply client-side filters + keyword
+        projects = await Database.fetchProjects({});
+        projects = this.filterProjects(projects, this.activeFilters);
+
+        if (searchQuery) {
+          projects = this.keywordFilter(projects, searchQuery);
+        }
       }
 
       if (loadingSkeleton) loadingSkeleton.classList.add('hidden');
@@ -109,7 +127,7 @@ const Filters = {
       Projects.currentProjects = projects;
 
     } catch (err) {
-      console.error('Filter error:', err);
+      console.error('Search error:', err);
       if (loadingSkeleton) loadingSkeleton.classList.add('hidden');
       Projects.showErrorState(container);
     }

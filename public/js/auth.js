@@ -344,6 +344,7 @@ const Auth = {
     // Clear saved project cache so next user starts fresh
     if (typeof Projects !== 'undefined') {
       Projects.savedProjectIds = new Set();
+      Projects._patchSaveButtons(); // reset all visible save buttons to default state
     }
 
     const authButtons = document.getElementById('nav-auth-buttons');

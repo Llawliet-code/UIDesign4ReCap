@@ -43,17 +43,19 @@ const Navigation = {
       case 'landing':
         tabIndex = 0;
         break;
-      case 'detail':
+      case 'dashboard':
         tabIndex = 1;
-        // Load project details when switching to detail view
+        if (typeof Projects !== 'undefined') {
+          Projects.loadSavedProjects();
+        }
+        break;
+      case 'detail':
+        tabIndex = 2;
         if (typeof Projects !== 'undefined') {
           Projects.loadDetailView();
         }
         break;
       case 'chatbot':
-        tabIndex = 2;
-        break;
-      case 'dashboard':
         tabIndex = 3;
         break;
     }
@@ -115,7 +117,7 @@ const Navigation = {
    */
   setupKeyboardNavigation() {
     const tabs = document.querySelectorAll('.tab');
-    const viewNames = ['landing', 'detail', 'chatbot', 'dashboard'];
+    const viewNames = ['landing', 'dashboard', 'detail', 'chatbot'];
     
     tabs.forEach((tab, index) => {
       tab.addEventListener('keydown', (e) => {
@@ -158,7 +160,7 @@ const Navigation = {
     
     // Setup tab click handlers with proper view mapping
     const tabs = document.querySelectorAll('.tab');
-    const viewNames = ['landing', 'detail', 'chatbot', 'dashboard'];
+    const viewNames = ['landing', 'dashboard', 'detail', 'chatbot'];
     
     tabs.forEach((tab, index) => {
       // Remove any existing click handlers
