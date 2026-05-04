@@ -61,6 +61,11 @@ const Chat = {
     userMsg.setAttribute('role', 'log');
     messages.appendChild(userMsg);
 
+    // Add to conversation history
+    if (typeof ConversationManager !== 'undefined') {
+      ConversationManager.addMessage('user', userMessage);
+    }
+
     input.value = '';
     messages.scrollTop = messages.scrollHeight;
     
@@ -87,6 +92,11 @@ const Chat = {
       
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
+
+      // Add to conversation history
+      if (typeof ConversationManager !== 'undefined') {
+        ConversationManager.addMessage('assistant', response.message, response.provider);
+      }
       
     } catch (error) {
       this.hideTyping(messages);
@@ -118,6 +128,11 @@ const Chat = {
     userMsg.textContent = userMessage;
     messages.appendChild(userMsg);
 
+    // Add to conversation history
+    if (typeof ConversationManager !== 'undefined') {
+      ConversationManager.addMessage('user', userMessage);
+    }
+
     input.value = '';
     
     // Show typing indicator
@@ -148,6 +163,11 @@ const Chat = {
       
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
+
+      // Add to conversation history
+      if (typeof ConversationManager !== 'undefined') {
+        ConversationManager.addMessage('assistant', response.message, response.provider);
+      }
       
     } catch (error) {
       // Hide typing indicator

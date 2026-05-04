@@ -34,6 +34,16 @@ const Navigation = {
       activeView.setAttribute('aria-hidden', 'false');
     }
 
+    // Hide/show floating chat button based on view with smooth transition
+    const chatFab = document.getElementById('chat-fab');
+    if (chatFab) {
+      if (viewName === 'chatbot') {
+        chatFab.classList.add('hidden');
+      } else {
+        chatFab.classList.remove('hidden');
+      }
+    }
+
     // Activate selected tab based on view name
     const tabs = document.querySelectorAll('.tab');
     let tabIndex = -1;
@@ -43,19 +53,19 @@ const Navigation = {
       case 'landing':
         tabIndex = 0;
         break;
-      case 'dashboard':
+      case 'detail':
         tabIndex = 1;
         if (typeof Projects !== 'undefined') {
           Projects.loadSavedProjects();
         }
         break;
-      case 'detail':
+      case 'chatbot':
         tabIndex = 2;
         if (typeof Projects !== 'undefined') {
           Projects.loadDetailView();
         }
         break;
-      case 'chatbot':
+      case 'dashboard': 
         tabIndex = 3;
         break;
     }
@@ -117,7 +127,7 @@ const Navigation = {
    */
   setupKeyboardNavigation() {
     const tabs = document.querySelectorAll('.tab');
-    const viewNames = ['landing', 'dashboard', 'detail', 'chatbot'];
+    const viewNames = ['landing', 'detail', 'chatbot', 'dashboard'];
     
     tabs.forEach((tab, index) => {
       tab.addEventListener('keydown', (e) => {
@@ -160,7 +170,8 @@ const Navigation = {
     
     // Setup tab click handlers with proper view mapping
     const tabs = document.querySelectorAll('.tab');
-    const viewNames = ['landing', 'dashboard', 'detail', 'chatbot'];
+    const viewNames = ['landing', 'detail', 'chatbot', 'dashboard'];
+
     
     tabs.forEach((tab, index) => {
       // Remove any existing click handlers

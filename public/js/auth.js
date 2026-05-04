@@ -11,21 +11,58 @@ const Auth = {
   // Temporary — replace with real Firebase accounts when ready.
   _fallbackUsers: {
     'admin@ctu.edu.ph': {
-      password: 'admin123',
+      password: 'CTU@dmin2024!',
       profile: { name: 'Admin User', role: 'admin', department: 'System Administration', program: 'N/A', studentId: 'ADM-001' }
     },
     'librarian@ctu.edu.ph': {
-      password: 'librarian123',
+      password: 'CTU@Lib2024!',
       profile: { name: 'Ms. Maria Santos', role: 'librarian', department: 'Library Services', program: 'N/A', studentId: 'LIB-001' }
     },
     'adviser@ctu.edu.ph': {
-      password: 'adviser123',
+      password: 'CTU@Adv2024!',
       profile: { name: 'Prof. Elena Villanueva', role: 'adviser', department: 'Computer Science', program: 'N/A', studentId: 'ADV-001' }
     },
     'student@ctu.edu.ph': {
-      password: 'student123',
+      password: 'CTU@Stud2024!',
       profile: { name: 'Juan dela Cruz', role: 'student', program: 'BSIT 3A', studentId: '2021-12345', department: '' }
     },
+  },
+
+  // ─── SESSION PERSISTENCE ──────────────────────────────────────────────────
+
+  saveSession() {
+    if (this.currentUser) {
+      try {
+        localStorage.setItem('recap_user_session', JSON.stringify(this.currentUser));
+        console.log('✓ Session saved');
+      } catch (e) {
+        console.error('Failed to save session:', e);
+      }
+    }
+  },
+
+  loadSession() {
+    try {
+      const savedSession = localStorage.getItem('recap_user_session');
+      if (savedSession) {
+        this.currentUser = JSON.parse(savedSession);
+        console.log('✓ Session restored');
+        return true;
+      }
+    } catch (e) {
+      console.error('Failed to load session:', e);
+      localStorage.removeItem('recap_user_session');
+    }
+    return false;
+  },
+
+  clearSession() {
+    try {
+      localStorage.removeItem('recap_user_session');
+      console.log('✓ Session cleared');
+    } catch (e) {
+      console.error('Failed to clear session:', e);
+    }
   },
 
   // ─── MODAL HELPERS ────────────────────────────────────────────────────────
@@ -236,6 +273,9 @@ const Auth = {
   },
 
   _onLoginSuccess() {
+    // Save session to localStorage
+    this.saveSession();
+
     const form = document.getElementById('login-form');
     const success = document.getElementById('login-success');
     if (form) form.classList.add('hidden');
@@ -244,6 +284,12 @@ const Auth = {
     setTimeout(() => {
       this.closeLoginModal();
       this.updateUIForLoggedInUser();
+      
+      // Reinitialize conversation manager for logged-in user
+      if (typeof ConversationManager !== 'undefined') {
+        ConversationManager.init();
+      }
+      
       if (typeof Navigation !== 'undefined') {
         Navigation.switchView('dashboard');
         setTimeout(() => {
@@ -302,6 +348,14 @@ const Auth = {
 
       this.currentUser = { id: uid, ...profile };
 
+      // Save session to localStorage
+      this.saveSession();
+
+      // Reinitialize conversation manager for logged-in user
+      if (typeof ConversationManager !== 'undefined') {
+        ConversationManager.init();
+      }
+
       // Show success
       const form = document.getElementById('signup-form');
       const success = document.getElementById('signup-success');
@@ -340,6 +394,14 @@ const Auth = {
     }
 
     this.currentUser = null;
+    
+    // Clear session from localStorage
+    this.clearSession();
+
+    // Clear conversation history
+    if (typeof ConversationManager !== 'undefined') {
+      ConversationManager.clearConversations();
+    }
 
     // Clear saved project cache so next user starts fresh
     if (typeof Projects !== 'undefined') {
@@ -507,6 +569,19 @@ const Auth = {
   // ─── INIT ─────────────────────────────────────────────────────────────────
 
   init() {
+    // Try to restore session from localStorage first
+    const sessionRestored = this.loadSession();
+    if (sessionRestored) {
+      this.updateUIForLoggedInUser();
+      
+      // Reinitialize conversation manager for restored session
+      if (typeof ConversationManager !== 'undefined') {
+        ConversationManager.init();
+      }
+      
+      console.log('✓ User session restored from localStorage');
+    }
+
     // Listen to Firebase Auth state — fires on every page load if user is signed in
     auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
@@ -514,13 +589,22 @@ const Auth = {
           const profileDoc = await db.collection('users').doc(firebaseUser.uid).get();
           if (profileDoc.exists) {
             this.currentUser = { id: firebaseUser.uid, ...profileDoc.data() };
+            this.saveSession(); // Save Firebase session to localStorage
             this.updateUIForLoggedInUser();
+            
+            // Reinitialize conversation manager
+            if (typeof ConversationManager !== 'undefined') {
+              ConversationManager.init();
+            }
           }
         } catch (e) {
           console.error('Error loading user profile:', e);
         }
       } else {
-        this.currentUser = null;
+        // Only clear UI if no localStorage session exists
+        if (!sessionRestored) {
+          this.currentUser = null;
+        }
       }
     });
 

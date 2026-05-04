@@ -153,6 +153,14 @@ const Database = {
    * Fetch user's saved projects — returns full project objects
    */
   async fetchSavedProjects(userId) {
+    // Check if user is authenticated with Firebase
+    const firebaseUser = auth.currentUser;
+    
+    if (!firebaseUser) {
+      // Fallback account - use localStorage
+      return this.fetchSavedProjectsFromLocalStorage(userId);
+    }
+    
     try {
       const snapshot = await db.collection('savedProjects')
         .where('userId', '==', userId)
@@ -178,7 +186,40 @@ const Database = {
       return results.filter(Boolean);
 
     } catch (error) {
-      console.error('Error fetching saved projects:', error);
+      console.error('Error fetching saved projects from Firestore:', error);
+      // Fallback to localStorage
+      return this.fetchSavedProjectsFromLocalStorage(userId);
+    }
+  },
+
+  /**
+   * Fetch saved projects from localStorage (for fallback accounts)
+   */
+  async fetchSavedProjectsFromLocalStorage(userId) {
+    try {
+      const key = `recap_saved_projects_${userId}`;
+      const saved = localStorage.getItem(key);
+      
+      if (!saved) return [];
+      
+      const projectIds = JSON.parse(saved);
+      
+      // Fetch full project data from Firestore (projects are public)
+      const fetches = projectIds.map(pid =>
+        db.collection('projects').doc(pid).get().then(projDoc => {
+          if (projDoc.exists) return { id: projDoc.id, ...projDoc.data() };
+          return null;
+        }).catch(err => {
+          console.error(`Error fetching project ${pid}:`, err);
+          return null;
+        })
+      );
+
+      const results = await Promise.all(fetches);
+      return results.filter(Boolean);
+      
+    } catch (error) {
+      console.error('Error fetching saved projects from localStorage:', error);
       return [];
     }
   },

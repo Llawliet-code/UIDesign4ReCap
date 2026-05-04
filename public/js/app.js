@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✓ Chat initialized');
   }
 
+  // Initialize Conversation Manager
+  if (typeof ConversationManager !== 'undefined') {
+    ConversationManager.init();
+    console.log('✓ Conversation Manager initialized');
+  }
+
   if (typeof Utils !== 'undefined') {
     Utils.init();
     console.log('✓ Utils initialized');
