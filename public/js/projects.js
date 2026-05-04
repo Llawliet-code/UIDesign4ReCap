@@ -246,6 +246,12 @@ const Projects = {
       sessionStorage.setItem('currentProject', JSON.stringify(project));
       this.populateDetailView(project);
 
+      // Show the Project Detail tab (make it visible and keep it visible)
+      const projectDetailTab = document.getElementById('tab-project-detail');
+      if (projectDetailTab) {
+        projectDetailTab.style.display = '';
+      }
+
       if (typeof Navigation !== 'undefined') {
         Navigation.switchView('detail');
       }
@@ -266,6 +272,12 @@ const Projects = {
     
     // Populate detail view
     this.populateDetailView(project);
+    
+    // Show the Project Detail tab (make it visible and keep it visible)
+    const projectDetailTab = document.getElementById('tab-project-detail');
+    if (projectDetailTab) {
+      projectDetailTab.style.display = '';
+    }
     
     // Switch to detail view
     if (typeof Navigation !== 'undefined') {

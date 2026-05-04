@@ -15,6 +15,8 @@ const ConversationManager = {
     // Check if user is logged in
     if (!this.isUserLoggedIn()) {
       console.log('✓ Conversation Manager: User not logged in, skipping initialization');
+      // Setup warning for non-logged-in users with conversations
+      this.setupUnsavedWarning();
       return;
     }
 
@@ -30,6 +32,7 @@ const ConversationManager = {
 
     this.renderConversationList();
     this.loadCurrentConversation();
+    this.initBackdropHandler();
     
     console.log('✓ Conversation Manager initialized');
   },
@@ -349,9 +352,72 @@ const ConversationManager = {
     }
 
     const sidebar = document.getElementById('conversation-sidebar');
+    const backdrop = document.getElementById('conversation-backdrop');
+    
     if (sidebar) {
-      sidebar.classList.toggle('open');
+      const isOpen = sidebar.classList.toggle('open');
+      
+      // Toggle backdrop on mobile
+      if (backdrop) {
+        if (isOpen) {
+          backdrop.classList.add('active');
+        } else {
+          backdrop.classList.remove('active');
+        }
+      }
+
+      // Prevent body scroll on mobile when sidebar is open
+      if (window.innerWidth <= 768) {
+        if (isOpen) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      }
     }
+  },
+
+  /**
+   * Close sidebar (used by backdrop click)
+   */
+  closeSidebar() {
+    const sidebar = document.getElementById('conversation-sidebar');
+    const backdrop = document.getElementById('conversation-backdrop');
+    
+    if (sidebar) {
+      sidebar.classList.remove('open');
+    }
+    
+    if (backdrop) {
+      backdrop.classList.remove('active');
+    }
+
+    // Restore body scroll
+    if (window.innerWidth <= 768) {
+      document.body.style.overflow = '';
+    }
+  },
+
+  /**
+   * Initialize backdrop click handler
+   */
+  initBackdropHandler() {
+    const backdrop = document.getElementById('conversation-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', () => {
+        this.closeSidebar();
+      });
+    }
+
+    // Close sidebar on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const sidebar = document.getElementById('conversation-sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+          this.closeSidebar();
+        }
+      }
+    });
   },
 
   /**
@@ -445,6 +511,41 @@ const ConversationManager = {
     this.conversations = [];
     this.currentConversationId = null;
     this.renderConversationList();
+    
+    // Clear the chat UI (both floating and inline)
+    this.clearChatUI();
+    
+    console.log('✓ Conversations cleared on logout');
+  },
+
+  /**
+   * Setup warning for non-logged-in users with unsaved conversations
+   */
+  setupUnsavedWarning() {
+    window.addEventListener('beforeunload', (e) => {
+      // Check if user is not logged in and has chat messages
+      if (!this.isUserLoggedIn() && this.hasUnsavedMessages()) {
+        const message = 'You have unsaved conversations. Please log in to save your chat history before leaving.';
+        e.preventDefault();
+        e.returnValue = message; // Standard for most browsers
+        return message; // For some older browsers
+      }
+    });
+  },
+
+  /**
+   * Check if there are unsaved messages in the chat
+   */
+  hasUnsavedMessages() {
+    const floatingMessages = document.getElementById('chat-messages');
+    const inlineMessages = document.getElementById('inline-chat-messages');
+    
+    // Check if there are more than just the initial greeting message
+    const floatingCount = floatingMessages ? floatingMessages.querySelectorAll('.msg').length : 0;
+    const inlineCount = inlineMessages ? inlineMessages.querySelectorAll('.msg').length : 0;
+    
+    // More than 1 message means user has chatted (initial greeting is 1 message)
+    return floatingCount > 1 || inlineCount > 1;
   }
 };
 

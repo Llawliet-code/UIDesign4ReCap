@@ -290,6 +290,11 @@ const Auth = {
         ConversationManager.init();
       }
       
+      // Reinitialize chatbot view state
+      if (typeof Chat !== 'undefined') {
+        Chat.initChatbotViewState();
+      }
+      
       if (typeof Navigation !== 'undefined') {
         Navigation.switchView('dashboard');
         setTimeout(() => {
@@ -407,6 +412,11 @@ const Auth = {
     if (typeof Projects !== 'undefined') {
       Projects.savedProjectIds = new Set();
       Projects._patchSaveButtons(); // reset all visible save buttons to default state
+    }
+
+    // Reinitialize chatbot view state to show guest empty state
+    if (typeof Chat !== 'undefined') {
+      Chat.initChatbotViewState();
     }
 
     const authButtons = document.getElementById('nav-auth-buttons');
@@ -595,6 +605,11 @@ const Auth = {
             // Reinitialize conversation manager
             if (typeof ConversationManager !== 'undefined') {
               ConversationManager.init();
+            }
+            
+            // Reinitialize chatbot view state
+            if (typeof Chat !== 'undefined') {
+              Chat.initChatbotViewState();
             }
           }
         } catch (e) {

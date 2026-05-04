@@ -69,6 +69,9 @@ const Chat = {
     input.value = '';
     messages.scrollTop = messages.scrollHeight;
     
+    // Show login reminder for non-logged-in users (after first message)
+    this.showLoginReminderIfNeeded(messages);
+    
     // Show typing indicator
     this.showTyping(messages);
     
@@ -134,6 +137,9 @@ const Chat = {
     }
 
     input.value = '';
+    
+    // Show login reminder for non-logged-in users (after first message)
+    this.showLoginReminderIfNeeded(messages);
     
     // Show typing indicator
     const typingIndicator = document.getElementById('typing-indicator');
@@ -272,6 +278,54 @@ const Chat = {
   },
 
   /**
+   * Show login reminder for non-logged-in users
+   */
+  showLoginReminderIfNeeded(container) {
+    // Check if user is logged in
+    const isLoggedIn = typeof Auth !== 'undefined' && Auth.currentUser !== null;
+    
+    // Check if reminder already shown
+    const reminderExists = container.querySelector('.chat-login-reminder');
+    
+    // Only show once per session for non-logged-in users
+    if (!isLoggedIn && !reminderExists) {
+      const reminder = document.createElement('div');
+      reminder.className = 'chat-login-reminder';
+      reminder.innerHTML = `
+        <div class="chat-login-reminder-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="chat-login-reminder-content">
+          <strong>Save your conversation!</strong>
+          <p>Log in to save your chat history. Your conversations will be lost if you refresh or leave this page.</p>
+          <button class="chat-login-btn" data-action="show-login">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            Log In Now
+          </button>
+        </div>
+      `;
+      
+      // Insert after the first user message
+      const firstUserMsg = container.querySelector('.msg-user');
+      if (firstUserMsg && firstUserMsg.nextSibling) {
+        container.insertBefore(reminder, firstUserMsg.nextSibling);
+      } else {
+        container.appendChild(reminder);
+      }
+      
+      container.scrollTop = container.scrollHeight;
+    }
+  },
+
+  /**
    * Initialize chat
    */
   init() {
@@ -297,7 +351,61 @@ const Chat = {
       });
     }
 
+    // Setup guest start chat button
+    const guestStartBtn = document.getElementById('guest-start-chat-btn');
+    if (guestStartBtn) {
+      guestStartBtn.addEventListener('click', () => {
+        this.startGuestChat();
+      });
+    }
+
+    // Initialize chatbot view state based on login status
+    this.initChatbotViewState();
+
     console.log('✓ Chat initialized');
+  },
+
+  /**
+   * Initialize chatbot view state (show guest empty state or chatbot interface)
+   */
+  initChatbotViewState() {
+    const isLoggedIn = typeof Auth !== 'undefined' && Auth.currentUser !== null;
+    const guestEmpty = document.getElementById('guest-chatbot-empty');
+    const chatbotInterface = document.getElementById('chatbot-interface');
+    
+    if (isLoggedIn) {
+      // User is logged in - show chatbot interface directly
+      if (guestEmpty) guestEmpty.style.display = 'none';
+      if (chatbotInterface) chatbotInterface.classList.add('active');
+    } else {
+      // User is not logged in - show guest empty state
+      if (guestEmpty) guestEmpty.style.display = 'flex';
+      if (chatbotInterface) chatbotInterface.classList.remove('active');
+    }
+  },
+
+  /**
+   * Start guest chat session
+   */
+  startGuestChat() {
+    const guestEmpty = document.getElementById('guest-chatbot-empty');
+    const chatbotInterface = document.getElementById('chatbot-interface');
+    
+    // Hide guest empty state
+    if (guestEmpty) {
+      guestEmpty.style.display = 'none';
+    }
+    
+    // Show chatbot interface
+    if (chatbotInterface) {
+      chatbotInterface.classList.add('active');
+    }
+    
+    // Focus on input
+    const inlineInput = document.getElementById('inline-chat-input');
+    if (inlineInput) {
+      setTimeout(() => inlineInput.focus(), 100);
+    }
   }
 };
 
