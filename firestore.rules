@@ -27,5 +27,11 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.userId == request.auth.uid;
     }
+
+    // Conversations — authenticated users can only access their own
+    match /conversations/{userId} {
+      // Read/Write: must be authenticated and userId must match their own UID
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

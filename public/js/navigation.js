@@ -38,37 +38,40 @@ const Navigation = {
       activeView.setAttribute('aria-hidden', 'false');
     }
 
-    // Activate selected tab based on view name
-    const tabs = document.querySelectorAll('.tab');
-    let tabIndex = -1;
-    
-    // Map view names to tab indices (matching HTML order)
-    switch(viewName) {
-      case 'landing':
-        tabIndex = 0;
-        break;
-      case 'dashboard':
-        tabIndex = 1;
-        if (typeof Projects !== 'undefined') {
-          Projects.loadSavedProjects();
-        }
-        break;
-      case 'detail':
-        tabIndex = 2;
-        if (typeof Projects !== 'undefined') {
-          Projects.loadDetailView();
-        }
-        break;
-      case 'chatbot':
-        tabIndex = 3;
-        break;
+    // Hide/show floating chat button based on view with smooth transition
+    const chatFab = document.getElementById('chat-fab');
+    if (chatFab) {
+      if (viewName === 'chatbot') {
+        chatFab.classList.add('hidden');
+      } else {
+        chatFab.classList.remove('hidden');
+      }
     }
+
+    // Close conversation sidebar when navigating away from AI Chatbot
+    if (viewName !== 'chatbot' && typeof ConversationManager !== 'undefined') {
+      const sidebar = document.getElementById('conversation-sidebar');
+      if (sidebar && sidebar.classList.contains('open')) {
+        ConversationManager.closeSidebar();
+      }
+    }
+
+    // Find the correct tab by data-view attribute instead of index
+    // This is more reliable when tabs can be hidden/shown dynamically
+    const tabs = document.querySelectorAll('.tab');
+    let tabToActivate = null;
+    
+    tabs.forEach(tab => {
+      if (tab.dataset.view === viewName) {
+        tabToActivate = tab;
+      }
+    });
     
     // Activate the correct tab
-    if (tabIndex >= 0 && tabs[tabIndex]) {
-      tabs[tabIndex].classList.add('active');
-      tabs[tabIndex].setAttribute('aria-selected', 'true');
-      tabs[tabIndex].setAttribute('tabindex', '0');
+    if (tabToActivate) {
+      tabToActivate.classList.add('active');
+      tabToActivate.setAttribute('aria-selected', 'true');
+      tabToActivate.setAttribute('tabindex', '0');
     }
 
     // Smooth scroll to top
@@ -120,38 +123,45 @@ const Navigation = {
    * Setup keyboard navigation for tabs
    */
   setupKeyboardNavigation() {
-    const tabs = document.querySelectorAll('.tab');
-    const viewNames = ['landing', 'dashboard', 'detail', 'chatbot'];
+    const allTabs = document.querySelectorAll('.tab');
     
-    tabs.forEach((tab, index) => {
+    allTabs.forEach((tab) => {
       tab.addEventListener('keydown', (e) => {
-        let newIndex = index;
+        // Get only visible tabs for navigation
+        const visibleTabs = Array.from(document.querySelectorAll('.tab')).filter(t => {
+          return t.style.display !== 'none' && window.getComputedStyle(t).display !== 'none';
+        });
+        
+        const currentIndex = visibleTabs.indexOf(tab);
+        if (currentIndex === -1) return;
+        
+        let newIndex = currentIndex;
         
         if (e.key === 'ArrowRight') {
           e.preventDefault();
-          newIndex = (index + 1) % tabs.length;
+          newIndex = (currentIndex + 1) % visibleTabs.length;
         } else if (e.key === 'ArrowLeft') {
           e.preventDefault();
-          newIndex = (index - 1 + tabs.length) % tabs.length;
+          newIndex = (currentIndex - 1 + visibleTabs.length) % visibleTabs.length;
         } else if (e.key === 'Home') {
           e.preventDefault();
           newIndex = 0;
         } else if (e.key === 'End') {
           e.preventDefault();
-          newIndex = tabs.length - 1;
+          newIndex = visibleTabs.length - 1;
         } else {
           return;
         }
         
-        this.switchView(viewNames[newIndex]);
-        
-        // Focus the new tab after a short delay
-        setTimeout(() => {
-          const updatedTabs = document.querySelectorAll('.tab');
-          if (updatedTabs[newIndex]) {
-            updatedTabs[newIndex].focus();
-          }
-        }, 50);
+        const targetTab = visibleTabs[newIndex];
+        if (targetTab && targetTab.dataset.view) {
+          this.switchView(targetTab.dataset.view);
+          
+          // Focus the new tab after a short delay
+          setTimeout(() => {
+            targetTab.focus();
+          }, 50);
+        }
       });
     });
   },
@@ -162,11 +172,10 @@ const Navigation = {
   init() {
     this.setupKeyboardNavigation();
     
-    // Setup tab click handlers with proper view mapping
+    // Setup tab click handlers using data-view attribute
     const tabs = document.querySelectorAll('.tab');
-    const viewNames = ['landing', 'dashboard', 'detail', 'chatbot'];
     
-    tabs.forEach((tab, index) => {
+    tabs.forEach((tab) => {
       // Remove any existing click handlers
       const newTab = tab.cloneNode(true);
       tab.parentNode.replaceChild(newTab, tab);
@@ -174,8 +183,11 @@ const Navigation = {
       // Add new click handler
       newTab.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Tab clicked:', viewNames[index]);
-        this.switchView(viewNames[index]);
+        const viewName = newTab.dataset.view;
+        if (viewName) {
+          console.log('Tab clicked:', viewName);
+          this.switchView(viewName);
+        }
       });
     });
 

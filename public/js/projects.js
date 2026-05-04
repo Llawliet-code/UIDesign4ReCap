@@ -246,6 +246,12 @@ const Projects = {
       sessionStorage.setItem('currentProject', JSON.stringify(project));
       this.populateDetailView(project);
 
+      // Show the Project Detail tab (make it visible and keep it visible)
+      const projectDetailTab = document.getElementById('tab-project-detail');
+      if (projectDetailTab) {
+        projectDetailTab.style.display = '';
+      }
+
       if (typeof Navigation !== 'undefined') {
         Navigation.switchView('detail');
       }
@@ -266,6 +272,12 @@ const Projects = {
     
     // Populate detail view
     this.populateDetailView(project);
+    
+    // Show the Project Detail tab (make it visible and keep it visible)
+    const projectDetailTab = document.getElementById('tab-project-detail');
+    if (projectDetailTab) {
+      projectDetailTab.style.display = '';
+    }
     
     // Switch to detail view
     if (typeof Navigation !== 'undefined') {
@@ -348,16 +360,31 @@ const Projects = {
     }
     
     const isSaved = button.getAttribute('aria-pressed') === 'true';
+    const firebaseUser = auth.currentUser;
     
     try {
       if (isSaved) {
-        await Database.unsaveProject(Auth.currentUser.id, projectId);
+        // Unsave project
+        if (firebaseUser) {
+          // Real Firebase user - use Firestore
+          await Database.unsaveProject(Auth.currentUser.id, projectId);
+        }
         this.savedProjectIds.delete(projectId);
+        // Always save to localStorage as backup
+        this.saveSavedIdsToLocalStorage();
+        
         button.setAttribute('aria-pressed', 'false');
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save';
       } else {
-        await Database.saveProject(Auth.currentUser.id, projectId);
+        // Save project
+        if (firebaseUser) {
+          // Real Firebase user - use Firestore
+          await Database.saveProject(Auth.currentUser.id, projectId);
+        }
         this.savedProjectIds.add(projectId);
+        // Always save to localStorage as backup
+        this.saveSavedIdsToLocalStorage();
+        
         button.setAttribute('aria-pressed', 'true');
         button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:3px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved';
       }
@@ -374,16 +401,59 @@ const Projects = {
    */
   async loadSavedIds() {
     if (!Auth.currentUser) return;
+    
+    // Check if user is authenticated with Firebase
+    const firebaseUser = auth.currentUser;
+    
+    if (firebaseUser) {
+      // Real Firebase user - use Firestore
+      try {
+        const snapshot = await db.collection('savedProjects')
+          .where('userId', '==', Auth.currentUser.id)
+          .get();
+        this.savedProjectIds = new Set();
+        snapshot.forEach(doc => this.savedProjectIds.add(doc.data().projectId));
+      } catch (e) {
+        console.error('Error loading saved IDs from Firestore:', e);
+        // Fallback to localStorage
+        this.loadSavedIdsFromLocalStorage();
+      }
+    } else {
+      // Fallback account - use localStorage
+      this.loadSavedIdsFromLocalStorage();
+    }
+    
+    // Patch any already-rendered buttons on the page
+    this._patchSaveButtons();
+  },
+
+  /**
+   * Load saved project IDs from localStorage (for fallback accounts)
+   */
+  loadSavedIdsFromLocalStorage() {
     try {
-      const snapshot = await db.collection('savedProjects')
-        .where('userId', '==', Auth.currentUser.id)
-        .get();
-      this.savedProjectIds = new Set();
-      snapshot.forEach(doc => this.savedProjectIds.add(doc.data().projectId));
-      // Patch any already-rendered buttons on the page
-      this._patchSaveButtons();
+      const key = `recap_saved_projects_${Auth.currentUser.id}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        this.savedProjectIds = new Set(JSON.parse(saved));
+      } else {
+        this.savedProjectIds = new Set();
+      }
     } catch (e) {
-      console.error('Error loading saved IDs:', e);
+      console.error('Error loading saved IDs from localStorage:', e);
+      this.savedProjectIds = new Set();
+    }
+  },
+
+  /**
+   * Save project IDs to localStorage (for fallback accounts)
+   */
+  saveSavedIdsToLocalStorage() {
+    try {
+      const key = `recap_saved_projects_${Auth.currentUser.id}`;
+      localStorage.setItem(key, JSON.stringify([...this.savedProjectIds]));
+    } catch (e) {
+      console.error('Error saving IDs to localStorage:', e);
     }
   },
 
