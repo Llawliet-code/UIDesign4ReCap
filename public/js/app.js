@@ -170,6 +170,33 @@ function handleAction(action, element) {
     case 'clear-filters':
       if (typeof Filters !== 'undefined') Filters.clearAll();
       break;
+    case 'toggle-mobile-filters': {
+      const panel = document.getElementById('mobile-filter-panel');
+      const btn = document.getElementById('mobile-filter-toggle');
+      const sidebar = document.querySelector('.sidebar');
+      if (panel && sidebar) {
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+          // Clone sidebar content into mobile panel
+          panel.innerHTML = sidebar.innerHTML;
+          panel.classList.remove('hidden');
+          if (btn) btn.setAttribute('aria-expanded', 'true');
+          // Re-init checkboxes inside the cloned panel
+          panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', () => {
+              // Sync with original sidebar checkbox
+              const original = document.getElementById(cb.id);
+              if (original) original.checked = cb.checked;
+              if (typeof Filters !== 'undefined') Filters.apply();
+            });
+          });
+        } else {
+          panel.classList.add('hidden');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      }
+      break;
+    }
     case 'show-login':
       if (typeof Auth !== 'undefined') Auth.showLoginModal();
       break;

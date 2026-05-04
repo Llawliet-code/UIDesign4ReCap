@@ -1876,7 +1876,54 @@ body.theme-transitioning {
   .hero { 
     padding: 32px 20px; 
   }
-  
+
+  /* Nav — hide subtitle, compress brand */
+  .nav-subtitle {
+    display: none;
+  }
+
+  .nav-logo-img {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Nav auth buttons — smaller text */
+  .nav-login-btn,
+  .nav-signup-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .nav-user-btn {
+    font-size: 12px;
+    padding: 4px 8px 4px 4px;
+  }
+
+  /* Page tabs — scrollable, smaller text */
+  .page-tabs {
+    padding: 0 12px;
+    gap: 2px;
+  }
+
+  .tab {
+    font-size: 12px;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+
+  /* Dashboard header stacks */
+  .dash-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Detail view */
+  .detail-main {
+    padding: 20px 16px;
+  }
+
+  /* Chat panel */
   .chat-panel {
     width: calc(100vw - 48px);
     right: 24px;
@@ -1892,31 +1939,119 @@ body.theme-transitioning {
 }
 
 @media (max-width: 480px) {
+  /* Nav — tighten further */
+  .nav {
+    padding: 0 12px;
+    height: 52px;
+  }
+
+  .nav-title {
+    font-size: 12px;
+  }
+
+  .nav-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-actions {
+    gap: 4px;
+  }
+
+  .btn-about {
+    display: none; /* hide About on very small screens */
+  }
+
+  .nav-login-btn,
+  .nav-signup-btn {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 28px 16px;
+  }
+
   .hero h1 {
     font-size: 20px;
   }
   
   .hero p {
     font-size: 13px;
+    margin-bottom: 20px;
   }
   
   .search-bar {
     font-size: 14px;
     padding: 14px 48px 14px 16px;
   }
-  
+
+  .search-toggle {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* Tabs */
+  .page-tabs {
+    padding: 0 8px;
+  }
+
+  .tab {
+    font-size: 11px;
+    padding: 9px 10px;
+  }
+
+  /* Dashboard */
   .dash-grid {
     grid-template-columns: 1fr;
   }
-  
+
+  .dash-welcome {
+    font-size: 15px;
+  }
+
+  .role-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .role-tab {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  /* Cards */
   .result-card {
     padding: 14px 16px;
   }
-  
-  .detail-main {
-    padding: 20px;
+
+  .result-title {
+    font-size: 14px;
   }
-  
+
+  .result-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .save-btn,
+  .view-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  /* Detail */
+  .detail-main {
+    padding: 16px;
+  }
+
+  .detail-title {
+    font-size: 18px;
+  }
+
+  /* Chat */
   .chat-fab {
     width: 50px;
     height: 50px;
@@ -1928,6 +2063,65 @@ body.theme-transitioning {
     bottom: 80px;
     right: 20px;
     width: calc(100vw - 40px);
+    max-height: 420px;
+  }
+
+  /* Modals slide up from bottom */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-container {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 92vh;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Views */
+  .view {
+    padding: 12px;
+  }
+
+  /* Saved grid */
+  .saved-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stat cards */
+  .stat-num {
+    font-size: 24px;
+  }
+}
+
+/* =====================
+   MOBILE FILTER BAR
+   ===================== */
+.mobile-filter-bar {
+  display: none;
+  margin-bottom: 12px;
+}
+
+.mobile-filter-panel {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .mobile-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-filter-toggle {
+    color: var(--ctu-blue);
+    border-color: var(--ctu-blue);
+    font-size: 13px;
   }
 }
 

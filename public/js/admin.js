@@ -62,7 +62,7 @@ const Admin = {
       title: document.getElementById('project-title').value.trim(),
       authors: document.getElementById('project-authors').value.split(',').map(a => a.trim()).filter(a => a),
       adviser: document.getElementById('project-adviser').value.trim(),
-      year: document.getElementById('project-year').value.trim(), // Keep as string
+      year: parseInt(document.getElementById('project-year').value.trim()) || new Date().getFullYear(),
       program: document.getElementById('project-program').value,
       abstract: document.getElementById('project-abstract').value.trim(),
       topics: document.getElementById('project-topics').value.split(',').map(t => t.trim()).filter(t => t),
@@ -79,12 +79,11 @@ const Admin = {
       if (this.editingProjectId) {
         // Update existing project
         await Database.updateProject(this.editingProjectId, formData);
-        projectId = this.editingProjectId;
         this.showNotification('Project updated successfully!', 'success');
       } else {
-        // Add new project
-        const result = await Database.addProject(formData);
-        projectId = result.id;
+        // Add new project — Database.addProject returns the ID string directly
+        const newId = await Database.addProject(formData);
+        if (!newId) throw new Error('Failed to get project ID after adding');
         this.showNotification('Project added successfully!', 'success');
       }
       

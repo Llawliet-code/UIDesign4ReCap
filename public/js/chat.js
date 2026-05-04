@@ -28,8 +28,11 @@ const Chat = {
     console.log('Panel found, toggling...'); // Debug log
     panel.classList.toggle('open');
     
-    // Update ARIA attributes
+    // Update ARIA attributes — blur first so focus isn't trapped inside aria-hidden
     const isOpen = panel.classList.contains('open');
+    if (!isOpen && document.activeElement && panel.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
     panel.setAttribute('aria-hidden', !isOpen);
     
     console.log('Panel is now:', isOpen ? 'open' : 'closed'); // Debug log

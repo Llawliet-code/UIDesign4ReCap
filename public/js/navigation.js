@@ -16,6 +16,10 @@ const Navigation = {
 
     // Update views
     document.querySelectorAll('.view').forEach(view => {
+      // Blur any focused element inside before hiding to avoid aria-hidden warning
+      if (document.activeElement && view.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       view.classList.remove('active');
       view.setAttribute('aria-hidden', 'true');
     });
