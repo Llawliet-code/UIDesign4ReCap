@@ -101,7 +101,6 @@
    ===================== */
 .result-card,
 .stat-card,
-.saved-card,
 .fair-card {
   background: var(--surface);
   border-radius: var(--radius-lg);
@@ -624,6 +623,7 @@
 
 .admin-toolbar {
   display: grid;
+  /* border: 0.5px solid var(--border); */
   grid-template-columns: 1fr auto auto auto;
   gap: 12px;
   align-items: center;
@@ -631,10 +631,10 @@
 }
 
 .admin-search-input {
+    border:     2px solid var(--border-prominent);
   width: 100%;
   padding: 10px 14px;
   border-radius: var(--radius);
-  border: 0.5px solid var(--border);
   font-size: 14px;
   font-family: inherit;
   color: var(--text-primary);
@@ -651,7 +651,7 @@
 .admin-filter-select {
   padding: 10px 14px;
   border-radius: var(--radius);
-  border: 0.5px solid var(--border);
+    border:     2px solid var(--border-prominent);
   font-size: 13px;
   font-family: inherit;
   color: var(--text-primary);
@@ -669,7 +669,7 @@
 .admin-table-container {
   background: var(--surface);
   border-radius: var(--radius-lg);
-  border: 0.5px solid var(--border);
+  border: 2px solid var(--border-prominent); /* Dynamic border based on theme */
   overflow-x: auto;
   margin-bottom: 20px;
 }
@@ -997,7 +997,7 @@
   padding: 80px 20px;
   background: var(--surface);
   border-radius: var(--radius-lg);
-  border: 0.5px solid var(--border);
+  border: 2px solid var(--border-prominent); /* Dynamic border based on theme */
 }
 
 .empty-icon {

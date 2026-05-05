@@ -38,13 +38,27 @@ const Navigation = {
       activeView.setAttribute('aria-hidden', 'false');
     }
 
-    // Hide/show floating chat button based on view with smooth transition
+    // Hide/show floating chat button based on view and user status
     const chatFab = document.getElementById('chat-fab');
     if (chatFab) {
       if (viewName === 'chatbot') {
+        // ALWAYS hide FAB on chatbot view
+        chatFab.style.display = 'none';
         chatFab.classList.add('hidden');
       } else {
-        chatFab.classList.remove('hidden');
+        // Show FAB only if user is logged in OR guest has started chat
+        const isLoggedIn = typeof Auth !== 'undefined' && Auth.currentUser !== null;
+        const chatbotInterface = document.getElementById('chatbot-interface');
+        const guestHasStartedChat = chatbotInterface && chatbotInterface.classList.contains('active');
+        
+        if (isLoggedIn || guestHasStartedChat) {
+          chatFab.style.display = '';
+          chatFab.classList.remove('hidden');
+        } else {
+          // Guest user who hasn't started chat yet
+          chatFab.style.display = 'none';
+          chatFab.classList.add('hidden');
+        }
       }
     }
 

@@ -7,6 +7,7 @@ const ConversationManager = {
   maxConversations: 3,
   currentConversationId: null,
   conversations: [],
+  _unsavedWarningInitialized: false,
 
   /**
    * Initialize conversation manager
@@ -15,8 +16,7 @@ const ConversationManager = {
     // Check if user is logged in
     if (!this.isUserLoggedIn()) {
       console.log('✓ Conversation Manager: User not logged in, skipping initialization');
-      // Setup warning for non-logged-in users with conversations
-      this.setupUnsavedWarning();
+      // Note: setupUnsavedWarning() will be called when guest clicks "Start Chat"
       return;
     }
 
@@ -200,7 +200,13 @@ const ConversationManager = {
     conversation.messages.forEach(msg => {
       const messageDiv = document.createElement('div');
       messageDiv.className = `msg msg-${msg.role === 'user' ? 'user' : 'bot'}`;
-      messageDiv.textContent = msg.content;
+      
+      // Use markdown parser for assistant messages, plain text for user messages
+      if (msg.role === 'assistant' && typeof MarkdownParser !== 'undefined') {
+        messageDiv.innerHTML = MarkdownParser.parse(msg.content);
+      } else {
+        messageDiv.textContent = msg.content;
+      }
 
       // Add provider badge for assistant messages
       if (msg.role === 'assistant' && msg.provider) {
@@ -522,6 +528,13 @@ const ConversationManager = {
    * Setup warning for non-logged-in users with unsaved conversations
    */
   setupUnsavedWarning() {
+    // Prevent duplicate event listeners
+    if (this._unsavedWarningInitialized) {
+      return;
+    }
+    
+    this._unsavedWarningInitialized = true;
+    
     window.addEventListener('beforeunload', (e) => {
       // Check if user is not logged in and has chat messages
       if (!this.isUserLoggedIn() && this.hasUnsavedMessages()) {
@@ -531,6 +544,8 @@ const ConversationManager = {
         return message; // For some older browsers
       }
     });
+    
+    console.log('✓ Unsaved warning listener attached');
   },
 
   /**

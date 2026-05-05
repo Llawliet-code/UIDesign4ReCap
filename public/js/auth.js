@@ -293,6 +293,8 @@ const Auth = {
       // Reinitialize chatbot view state
       if (typeof Chat !== 'undefined') {
         Chat.initChatbotViewState();
+        // Show chat FAB for logged-in users
+        Chat.initChatFABVisibility();
       }
       
       if (typeof Navigation !== 'undefined') {
@@ -370,6 +372,14 @@ const Auth = {
       setTimeout(() => {
         this.closeSignupModal();
         this.updateUIForLoggedInUser();
+        
+        // Reinitialize chatbot view state
+        if (typeof Chat !== 'undefined') {
+          Chat.initChatbotViewState();
+          // Show chat FAB for logged-in users
+          Chat.initChatFABVisibility();
+        }
+        
         if (typeof Navigation !== 'undefined') Navigation.switchView('dashboard');
       }, 1500);
 
@@ -417,6 +427,8 @@ const Auth = {
     // Reinitialize chatbot view state to show guest empty state
     if (typeof Chat !== 'undefined') {
       Chat.initChatbotViewState();
+      // Hide chat FAB for guest users
+      Chat.initChatFABVisibility();
     }
 
     const authButtons = document.getElementById('nav-auth-buttons');
@@ -428,6 +440,11 @@ const Auth = {
     if (userMenu) { userMenu.classList.add('hidden'); userMenu.style.display = 'none'; }
     if (userAvatar) userAvatar.textContent = '';
     if (userName) userName.textContent = '';
+
+    // Update mobile menu
+    if (typeof MobileMenu !== 'undefined') {
+      MobileMenu.updateMenuItems();
+    }
 
     // Hide the dashboard tab when logged out
     const dashTab = document.getElementById('tab-dashboard');
@@ -466,6 +483,11 @@ const Auth = {
     if (dashTab) dashTab.style.display = '';
 
     this.applyRoleBasedAccess();
+
+    // Update mobile menu
+    if (typeof MobileMenu !== 'undefined') {
+      MobileMenu.updateMenuItems();
+    }
 
     // Load saved projects so dashboard is populated on every page load
     if (typeof Projects !== 'undefined') {
@@ -589,6 +611,12 @@ const Auth = {
         ConversationManager.init();
       }
       
+      // Reinitialize chatbot view state for restored session
+      if (typeof Chat !== 'undefined') {
+        Chat.initChatbotViewState();
+        Chat.initChatFABVisibility();
+      }
+      
       console.log('✓ User session restored from localStorage');
     }
 
@@ -610,6 +638,8 @@ const Auth = {
             // Reinitialize chatbot view state
             if (typeof Chat !== 'undefined') {
               Chat.initChatbotViewState();
+              // Show chat FAB for logged-in users
+              Chat.initChatFABVisibility();
             }
           }
         } catch (e) {

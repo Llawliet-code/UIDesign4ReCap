@@ -129,7 +129,7 @@
 /* =====================
    BORDER UTILITIES
    ===================== */
-.border { border: 0.5px solid var(--border); }
+.border { border: 2px solid var(--border-prominent); } /* Dynamic border based on theme */
 .border-bottom { border-bottom: 0.5px solid var(--border); }
 .border-top { border-top: 0.5px solid var(--border); }
 .border-none { border: none; }
@@ -191,16 +191,27 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--ctu-blue) 0%, #1e3a6e 100%);
+  padding: 24px 32px;
+  border-radius: var(--radius-lg);
+  color: #FFFFFF; /* Pure white */
 }
 
 .dash-welcome {
   font-size: 18px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #FFFFFF; /* Pure white text on gradient background */
 }
 
 .dash-welcome span {
-  color: var(--ctu-blue);
+  color: #FFFFFF; /* Pure white text for user name on gradient */
+  font-weight: 600;
+}
+
+/* Override text-secondary color inside dash-header for visibility */
+.dash-header .text-secondary {
+  color: #FFFFFF; /* Pure white for "Last login" */
+  opacity: 0.9; /* Slightly transparent for hierarchy */
 }
 
 .section-label {

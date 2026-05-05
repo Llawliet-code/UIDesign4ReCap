@@ -34,12 +34,6 @@
   margin-bottom: 20px;
 }
 
-.saved-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
 
 /* =====================
    FLEX LAYOUTS
@@ -76,7 +70,7 @@
 .sidebar {
   background: var(--surface);
   border-radius: var(--radius-lg);
-  border: 0.5px solid var(--border);
+  border: 2px solid var(--border-prominent); /* Dynamic border based on theme */
   padding: 16px;
   height: fit-content;
   position: sticky;
@@ -109,9 +103,6 @@
     grid-template-columns: repeat(2, 1fr); 
   }
   
-  .saved-grid { 
-    grid-template-columns: 1fr; 
-  }
 }
 
 @media (max-width: 480px) {

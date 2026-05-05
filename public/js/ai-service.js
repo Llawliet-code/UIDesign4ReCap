@@ -63,6 +63,65 @@ const AIService = {
    * Send message to AI (with automatic fallback)
    */
   async sendMessage(userMessage) {
+    // Check for direct answer first (faster, more accurate)
+    if (typeof AIKnowledgeBase !== 'undefined') {
+      const directAnswer = AIKnowledgeBase.findDirectAnswer(userMessage);
+      if (directAnswer) {
+        console.log('✓ Using direct answer from knowledge base');
+        
+        // Add to conversation history
+        AIConfig.conversationHistory.push({
+          role: 'user',
+          content: userMessage
+        });
+        
+        AIConfig.conversationHistory.push({
+          role: 'assistant',
+          content: directAnswer
+        });
+        
+        return {
+          message: directAnswer,
+          provider: 'knowledge-base'
+        };
+      }
+    }
+
+    // Check if query requires live data analysis
+    if (typeof AIDataContext !== 'undefined') {
+      const dataAnalysis = await AIDataContext.analyzeQuery(userMessage);
+      
+      if (dataAnalysis && dataAnalysis.hasData) {
+        console.log('✓ Query requires live data analysis');
+        
+        // Add user message to history
+        AIConfig.conversationHistory.push({
+          role: 'user',
+          content: userMessage
+        });
+        
+        // If data context provides complete answer, return it
+        if (dataAnalysis.context) {
+          AIConfig.conversationHistory.push({
+            role: 'assistant',
+            content: dataAnalysis.context
+          });
+          
+          return {
+            message: dataAnalysis.context,
+            provider: 'data-analysis'
+          };
+        }
+      } else if (dataAnalysis && !dataAnalysis.hasData) {
+        // No data available
+        return {
+          message: dataAnalysis.message,
+          provider: 'system'
+        };
+      }
+    }
+
+    // No direct answer found, use LLM
     // Add user message to history
     AIConfig.conversationHistory.push({
       role: 'user',
@@ -123,8 +182,12 @@ const AIService = {
    * Send message to Mistral AI
    */
   async sendToMistral(userMessage) {
+    // Build context with knowledge base
+    const knowledgeContext = this.buildKnowledgeContext(userMessage);
+    
     const messages = [
       { role: 'system', content: AIConfig.systemPrompt },
+      { role: 'system', content: knowledgeContext },
       ...AIConfig.conversationHistory.slice(-6) // Last 3 exchanges
     ];
 
@@ -224,6 +287,73 @@ const AIService = {
       gemini: this.geminiAvailable ? '✓ Available' : '✗ Unavailable',
       current: this.mistralAvailable ? 'Mistral' : (this.geminiAvailable ? 'Gemini' : 'None')
     };
+  },
+
+  /**
+   * Build knowledge base context for AI
+   */
+  buildKnowledgeContext(userMessage) {
+    if (typeof AIKnowledgeBase === 'undefined') {
+      return '';
+    }
+
+    const message = userMessage.toLowerCase();
+    let context = '**KNOWLEDGE BASE REFERENCE:**\n\n';
+
+    // Check for how-to questions
+    if (message.includes('how') || message.includes('search') || message.includes('find')) {
+      if (message.includes('search') || message.includes('find')) {
+        context += AIKnowledgeBase.howTo.search.answer + '\n\n';
+      }
+      if (message.includes('submit') || message.includes('upload')) {
+        context += AIKnowledgeBase.howTo.submit.answer + '\n\n';
+      }
+      if (message.includes('save') || message.includes('favorite')) {
+        context += AIKnowledgeBase.howTo.save.answer + '\n\n';
+      }
+      if (message.includes('cite') || message.includes('citation')) {
+        context += AIKnowledgeBase.howTo.citation.answer + '\n\n';
+      }
+      if (message.includes('chat') || message.includes('conversation')) {
+        context += AIKnowledgeBase.howTo.chatbot.answer + '\n\n';
+      }
+    }
+
+    // Check for role/permission questions
+    if (message.includes('role') || message.includes('permission') || message.includes('can i') || message.includes('access')) {
+      context += '**USER ROLES:**\n';
+      Object.keys(AIKnowledgeBase.roles).forEach(role => {
+        const roleInfo = AIKnowledgeBase.roles[role];
+        context += `- **${roleInfo.name}**: ${roleInfo.permissions.slice(0, 3).join(', ')}\n`;
+      });
+      context += '\n';
+    }
+
+    // Check for program questions
+    if (message.includes('program') || message.includes('course') || message.includes('bsit') || message.includes('bscs')) {
+      context += '**AVAILABLE PROGRAMS:**\n';
+      AIKnowledgeBase.programs.forEach(prog => {
+        context += `- **${prog.code}**: ${prog.name}\n`;
+      });
+      context += '\n';
+    }
+
+    // Check for FAIR principles
+    if (message.includes('fair') || message.includes('principle')) {
+      context += AIKnowledgeBase.howTo.fairPrinciples.answer + '\n\n';
+    }
+
+    // Check for troubleshooting
+    if (message.includes('not working') || message.includes('error') || message.includes('problem') || message.includes('issue')) {
+      context += '**COMMON ISSUES:**\n';
+      Object.keys(AIKnowledgeBase.troubleshooting).forEach(key => {
+        const issue = AIKnowledgeBase.troubleshooting[key];
+        context += `- ${issue.issue}: ${issue.solutions[0]}\n`;
+      });
+      context += '\n';
+    }
+
+    return context.trim() || 'Use the knowledge base to provide accurate information.';
   }
 };
 

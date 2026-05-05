@@ -14,6 +14,29 @@ const Chat = {
   },
 
   /**
+   * Create provider badge for AI responses
+   */
+  createProviderBadge(provider) {
+    const badge = document.createElement('span');
+    badge.className = 'ai-provider-badge';
+    
+    if (provider === 'knowledge-base') {
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>KB';
+    } else if (provider === 'data-analysis') {
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Data';
+    } else if (provider === 'system') {
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>System';
+    } else if (provider === 'mistral') {
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></svg>Mistral';
+    } else {
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Gemini';
+    }
+    
+    badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
+    return badge;
+  },
+
+  /**
    * Toggle floating chat panel
    */
   togglePanel() {
@@ -86,15 +109,11 @@ const Chat = {
       
       const botMsg = document.createElement('div');
       botMsg.className = 'msg msg-bot';
-      botMsg.textContent = response.message;
+      botMsg.innerHTML = MarkdownParser.parse(response.message);
       botMsg.setAttribute('role', 'log');
       
       // Add provider badge
-      const badge = document.createElement('span');
-      badge.className = 'ai-provider-badge';
-      badge.innerHTML = response.provider === 'mistral' ? '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></svg>Mistral' : '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Gemini';
-      badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
-      botMsg.appendChild(badge);
+      botMsg.appendChild(this.createProviderBadge(response.provider));
       
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
@@ -161,14 +180,10 @@ const Chat = {
       
       const botMsg = document.createElement('div');
       botMsg.className = 'msg msg-bot';
-      botMsg.textContent = response.message;
+      botMsg.innerHTML = MarkdownParser.parse(response.message);
       
       // Add provider badge
-      const badge = document.createElement('span');
-      badge.className = 'ai-provider-badge';
-      badge.innerHTML = response.provider === 'mistral' ? '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></svg>Mistral' : '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Gemini';
-      badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
-      botMsg.appendChild(badge);
+      botMsg.appendChild(this.createProviderBadge(response.provider));
       
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
@@ -229,14 +244,10 @@ const Chat = {
       
       const botMsg = document.createElement('div');
       botMsg.className = 'msg msg-bot';
-      botMsg.textContent = response.message;
+      botMsg.innerHTML = MarkdownParser.parse(response.message);
       
       // Add provider badge
-      const badge = document.createElement('span');
-      badge.className = 'ai-provider-badge';
-      badge.innerHTML = response.provider === 'mistral' ? '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></svg>Mistral' : '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle;margin-right:2px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Gemini';
-      badge.style.cssText = 'font-size: 10px; opacity: 0.6; margin-left: 8px;';
-      botMsg.appendChild(badge);
+      botMsg.appendChild(this.createProviderBadge(response.provider));
       
       messages.appendChild(botMsg);
       messages.scrollTop = messages.scrollHeight;
@@ -364,12 +375,17 @@ const Chat = {
 
     // Initialize chatbot view state based on login status
     this.initChatbotViewState();
+    
+    // Initialize chat FAB visibility based on login status
+    this.initChatFABVisibility();
 
     console.log('✓ Chat initialized');
   },
 
   /**
    * Initialize chatbot view state (show guest empty state or chatbot interface)
+   * Logged-in users automatically see the chatbot interface
+   * Guest users see the empty state with "Start Chat" button
    */
   initChatbotViewState() {
     const isLoggedIn = typeof Auth !== 'undefined' && Auth.currentUser !== null;
@@ -377,13 +393,56 @@ const Chat = {
     const chatbotInterface = document.getElementById('chatbot-interface');
     
     if (isLoggedIn) {
-      // User is logged in - show chatbot interface directly
-      if (guestEmpty) guestEmpty.style.display = 'none';
-      if (chatbotInterface) chatbotInterface.classList.add('active');
+      // User is logged in - automatically show chatbot interface
+      if (guestEmpty) {
+        guestEmpty.style.display = 'none';
+      }
+      if (chatbotInterface) {
+        chatbotInterface.classList.add('active');
+      }
+      console.log('✓ Chatbot interface activated for logged-in user');
     } else {
       // User is not logged in - show guest empty state
-      if (guestEmpty) guestEmpty.style.display = 'flex';
-      if (chatbotInterface) chatbotInterface.classList.remove('active');
+      if (guestEmpty) {
+        guestEmpty.style.display = 'flex';
+      }
+      if (chatbotInterface) {
+        chatbotInterface.classList.remove('active');
+      }
+      console.log('✓ Guest empty state displayed');
+    }
+  },
+
+  /**
+   * Initialize chat FAB visibility based on login status and current view
+   * For guest users, hide the FAB until they click "Start Chat"
+   * ALWAYS hide the FAB when on the AI Chatbot tab
+   */
+  initChatFABVisibility() {
+    const isLoggedIn = typeof Auth !== 'undefined' && Auth.currentUser !== null;
+    const chatFAB = document.getElementById('chat-fab');
+    const chatbotView = document.getElementById('view-chatbot');
+    
+    if (!chatFAB) return;
+    
+    // Check if currently on the chatbot view
+    const isOnChatbotView = chatbotView && chatbotView.classList.contains('active');
+    
+    // ALWAYS hide FAB on chatbot view
+    if (isOnChatbotView) {
+      chatFAB.style.display = 'none';
+      chatFAB.classList.add('hidden');
+      return;
+    }
+    
+    if (isLoggedIn) {
+      // User is logged in - show chat FAB (unless on chatbot view)
+      chatFAB.style.display = '';
+      chatFAB.classList.remove('hidden');
+    } else {
+      // User is guest - hide chat FAB (will be shown when they click "Start Chat")
+      chatFAB.style.display = 'none';
+      chatFAB.classList.add('hidden');
     }
   },
 
@@ -393,6 +452,8 @@ const Chat = {
   startGuestChat() {
     const guestEmpty = document.getElementById('guest-chatbot-empty');
     const chatbotInterface = document.getElementById('chatbot-interface');
+    const chatFAB = document.getElementById('chat-fab');
+    const chatbotView = document.getElementById('view-chatbot');
     
     // Hide guest empty state
     if (guestEmpty) {
@@ -402,6 +463,19 @@ const Chat = {
     // Show chatbot interface
     if (chatbotInterface) {
       chatbotInterface.classList.add('active');
+    }
+    
+    // Show chat FAB for guest users ONLY if not on chatbot view
+    const isOnChatbotView = chatbotView && chatbotView.classList.contains('active');
+    if (chatFAB && !isOnChatbotView) {
+      chatFAB.style.display = '';
+      chatFAB.classList.remove('hidden');
+    }
+    
+    // Setup unsaved warning for guest users
+    if (typeof ConversationManager !== 'undefined') {
+      ConversationManager.setupUnsavedWarning();
+      console.log('✓ Unsaved warning initialized for guest user');
     }
     
     // Focus on input

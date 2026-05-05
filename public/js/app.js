@@ -18,9 +18,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✓ Navigation initialized');
   }
 
+  if (typeof MobileMenu !== 'undefined') {
+    MobileMenu.init();
+    console.log('✓ Mobile Menu initialized');
+  }
+
   if (typeof Filters !== 'undefined') {
     Filters.init();
     console.log('✓ Filters initialized');
+  }
+
+  // Initialize Auth FIRST before Chat to ensure user session is loaded
+  if (typeof Auth !== 'undefined') {
+    Auth.init();
+    console.log('✓ Auth initialized');
   }
 
   // Initialize Groq AI before Search
@@ -40,6 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✓ AI Chatbot initialized');
   }
 
+  // Initialize AI Data Context (for live data analysis)
+  if (typeof AIDataContext !== 'undefined') {
+    await AIDataContext.initialize();
+    console.log('✓ AI Data Context initialized');
+  }
+
   if (typeof Chat !== 'undefined') {
     Chat.init();
     console.log('✓ Chat initialized');
@@ -54,11 +71,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof Utils !== 'undefined') {
     Utils.init();
     console.log('✓ Utils initialized');
-  }
-
-  if (typeof Auth !== 'undefined') {
-    Auth.init();
-    console.log('✓ Auth initialized');
   }
 
   if (typeof Admin !== 'undefined') {
