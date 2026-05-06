@@ -1,20 +1,28 @@
 # 📚 CTU RECAP - Capstone Project Repository
-v.5s
+v.5s.1
 **A modern, easy-to-use website for searching and viewing student research projects**
 
 ---
 
-## 🎯 What is This?
+## 🎯 What is This? 
 
 This is a website where students, teachers, and librarians can:
 - **Search** for past capstone projects
 - **Read** project details and abstracts
 - **Save** interesting projects for later
 - **Chat** with an AI assistant for help
+- **Submit** capstone metadata for validation (NEW!)
 
 ---
 
 ## ✨ Cool Features
+
+### 📤 Student Metadata Upload (NEW!)
+- Students can submit their capstone project information
+- Fill out a comprehensive form with project details
+- Submissions go to advisers for validation
+- Get notified when your submission is reviewed
+- Easy-to-use interface with helpful tooltips
 
 ### 🌙 Dark Mode
 - Click the moon icon (🌙) in the top menu

@@ -63,15 +63,21 @@ const AIDataContext = {
    */
   async analyzeQuery(userMessage) {
     const message = userMessage.toLowerCase();
+    console.log(`🔍 Analyzing query: "${userMessage}"`);
     
     // Check if query requires live data
     const requiresData = 
       message.includes('longest title') ||
+      message.includes('longest capstone') ||
       message.includes('shortest title') ||
+      message.includes('shortest capstone') ||
       message.includes('most recent') ||
       message.includes('latest project') ||
-      message.includes('how many projects') ||
+      message.includes('how many') ||
       message.includes('count') ||
+      message.includes('total') ||
+      message.includes('number of') ||
+      message.includes('stored') ||
       message.includes('list all') ||
       message.includes('show me all') ||
       message.includes('statistics') ||
@@ -79,7 +85,25 @@ const AIDataContext = {
       message.includes('trending') ||
       message.includes('by year') ||
       message.includes('in 2024') ||
-      message.includes('in 2025');
+      message.includes('in 2025') ||
+      message.includes('abstract') ||
+      message.includes('show me') ||
+      message.includes('find') ||
+      message.includes('search for') ||
+      message.includes('about') ||
+      message.includes('details') ||
+      message.includes('information') ||
+      message.includes('metadata') ||
+      message.includes('author') ||
+      message.includes('adviser') ||
+      message.includes('year completed') ||
+      message.includes('program') ||
+      message.includes('keywords') ||
+      message.includes('topics') ||
+      message.includes('findings') ||
+      message.includes('methodology');
+    
+    console.log(`📊 Requires data: ${requiresData}`);
     
     if (!requiresData) {
       return null; // No data context needed
@@ -87,8 +111,10 @@ const AIDataContext = {
     
     // Get projects and build context
     const projects = await this.getProjects();
+    console.log(`📦 Fetched ${projects ? projects.length : 0} projects from cache/database`);
     
     if (!projects || projects.length === 0) {
+      console.error('❌ No projects available');
       return {
         hasData: false,
         message: 'No project data available at the moment.'
@@ -99,29 +125,44 @@ const AIDataContext = {
     let context = '**LIVE PROJECT DATA:**\n\n';
     
     // Longest/Shortest title queries
-    if (message.includes('longest title')) {
+    if (message.includes('longest title') || message.includes('longest capstone')) {
       const longest = this.findLongestTitle(projects);
-      context += `**Longest Title:**\n`;
-      context += `- **Title:** ${longest.title}\n`;
-      context += `- **Length:** ${longest.title.length} characters\n`;
-      context += `- **Authors:** ${longest.authors.join(', ')}\n`;
-      context += `- **Year:** ${longest.year}\n`;
-      context += `- **Program:** ${longest.program}\n\n`;
+      if (longest) {
+        console.log(`📏 Found longest title: "${longest.title}" (${longest.title.length} chars)`);
+        context += `**Longest Title:**\n`;
+        context += `- **Title:** ${longest.title}\n`;
+        context += `- **Length:** ${longest.title.length} characters\n`;
+        context += `- **Authors:** ${Array.isArray(longest.authors) ? longest.authors.join(', ') : longest.authors}\n`;
+        context += `- **Year:** ${longest.year}\n`;
+        context += `- **Program:** ${longest.program}\n\n`;
+      } else {
+        console.error('❌ Could not find longest title');
+        context += `**Error:** Could not determine longest title from available data.\n\n`;
+      }
     }
     
-    if (message.includes('shortest title')) {
+    if (message.includes('shortest title') || message.includes('shortest capstone')) {
       const shortest = this.findShortestTitle(projects);
-      context += `**Shortest Title:**\n`;
-      context += `- **Title:** ${shortest.title}\n`;
-      context += `- **Length:** ${shortest.title.length} characters\n`;
-      context += `- **Authors:** ${shortest.authors.join(', ')}\n`;
-      context += `- **Year:** ${shortest.year}\n`;
-      context += `- **Program:** ${shortest.program}\n\n`;
+      if (shortest) {
+        console.log(`📏 Found shortest title: "${shortest.title}" (${shortest.title.length} chars)`);
+        context += `**Shortest Title:**\n`;
+        context += `- **Title:** ${shortest.title}\n`;
+        context += `- **Length:** ${shortest.title.length} characters\n`;
+        context += `- **Authors:** ${Array.isArray(shortest.authors) ? shortest.authors.join(', ') : shortest.authors}\n`;
+        context += `- **Year:** ${shortest.year}\n`;
+        context += `- **Program:** ${shortest.program}\n\n`;
+      } else {
+        console.error('❌ Could not find shortest title');
+        context += `**Error:** Could not determine shortest title from available data.\n\n`;
+      }
     }
     
-    // Count queries
-    if (message.includes('how many') || message.includes('count')) {
+    // Count queries - catch more variations
+    if (message.includes('how many') || message.includes('count') || 
+        message.includes('total') || message.includes('number of') || 
+        message.includes('stored')) {
       const stats = this.getStatistics(projects);
+      console.log(`📊 Building statistics context: ${stats.total} total projects`);
       context += `**Repository Statistics:**\n`;
       context += `- **Total Projects:** ${stats.total}\n`;
       context += `- **Programs:** ${Object.keys(stats.byProgram).map(p => `${p} (${stats.byProgram[p]})`).join(', ')}\n`;
@@ -165,6 +206,102 @@ const AIDataContext = {
       context += '\n';
     }
     
+    // Specific project search queries
+    if (message.includes('abstract') || message.includes('show me') || 
+        message.includes('find') || message.includes('search for') ||
+        message.includes('about') || message.includes('details') ||
+        message.includes('information') || message.includes('metadata')) {
+      
+      console.log('🔍 Searching for specific project in query...');
+      
+      // Try to find matching projects by searching keywords in the query
+      const searchResults = this.searchProjectsInQuery(projects, userMessage);
+      const exactMatches = searchResults.exact;
+      const similarMatches = searchResults.similar;
+      
+      console.log(`📦 Found ${exactMatches.length} exact match(es) and ${similarMatches.length} similar match(es)`);
+      
+      // CASE 1: Exact matches found - show full details
+      if (exactMatches.length > 0) {
+        context += `**Exact Match Found:**\n\n`;
+        
+        // Show up to 3 exact matches with FULL details
+        exactMatches.slice(0, 3).forEach((proj, idx) => {
+          context += `**Project ${idx + 1}:**\n`;
+          context += `- **Title:** ${proj.title}\n`;
+          context += `- **Authors:** ${Array.isArray(proj.authors) ? proj.authors.join(', ') : proj.authors || 'Not Available'}\n`;
+          context += `- **Adviser:** ${proj.adviser || 'Not Available'}\n`;
+          context += `- **Year:** ${proj.year || 'Not Available'}\n`;
+          context += `- **Program:** ${proj.program || 'Not Available'}\n`;
+          
+          if (proj.abstract) {
+            context += `- **Abstract:** ${proj.abstract}\n`;
+          } else {
+            context += `- **Abstract:** Not Available\n`;
+          }
+          
+          if (proj.keywords && Array.isArray(proj.keywords) && proj.keywords.length > 0) {
+            context += `- **Keywords:** ${proj.keywords.join(', ')}\n`;
+          }
+          
+          if (proj.topics && Array.isArray(proj.topics) && proj.topics.length > 0) {
+            context += `- **Topics:** ${proj.topics.join(', ')}\n`;
+          }
+          
+          if (proj.methodology) {
+            context += `- **Methodology:** ${proj.methodology}\n`;
+          }
+          
+          if (proj.findings) {
+            context += `- **Findings:** ${proj.findings}\n`;
+          }
+          
+          if (proj.futureResearch && Array.isArray(proj.futureResearch) && proj.futureResearch.length > 0) {
+            context += `- **Future Research:** ${proj.futureResearch.join('; ')}\n`;
+          }
+          
+          context += '\n';
+        });
+        
+        if (exactMatches.length > 3) {
+          context += `*Note: ${exactMatches.length - 3} more exact match(es) found.*\n\n`;
+        }
+      }
+      // CASE 2: No exact match, but similar matches found - show suggestions
+      else if (similarMatches.length > 0) {
+        context += `**No Exact Match Found**\n\n`;
+        context += `I couldn't find an exact match for your query, but here are some similar projects you might be looking for:\n\n`;
+        context += `**Did you mean:**\n\n`;
+        
+        similarMatches.forEach((proj, idx) => {
+          context += `${idx + 1}. **${proj.title}**\n`;
+          context += `   - Authors: ${Array.isArray(proj.authors) ? proj.authors.join(', ') : proj.authors || 'Not Available'}\n`;
+          context += `   - Year: ${proj.year || 'N/A'} | Program: ${proj.program || 'N/A'}\n`;
+          if (proj.topics && Array.isArray(proj.topics) && proj.topics.length > 0) {
+            context += `   - Topics: ${proj.topics.join(', ')}\n`;
+          }
+          context += '\n';
+        });
+        
+        context += `**Instructions for AI:** Present these as "Did you mean?" suggestions. Ask the user to clarify which project they want, or provide more specific keywords.\n\n`;
+      }
+      // CASE 3: No matches at all - show default message
+      else {
+        console.log('⚠️ No matching or similar projects found');
+        context += `**No Matching Projects Found**\n\n`;
+        context += `I searched the database but couldn't find any projects matching your query.\n\n`;
+        context += `**Suggestions:**\n`;
+        context += `- Check the spelling of the project title\n`;
+        context += `- Try using different keywords\n`;
+        context += `- Use broader search terms (e.g., "IoT" instead of full title)\n`;
+        context += `- Ask "How many projects are there?" to see what's available\n\n`;
+        context += `**Instructions for AI:** DO NOT suggest any specific projects. Only provide the suggestions above.\n\n`;
+      }
+    }
+    
+    // Add final verification
+    context += `\n---\n⚠️ VERIFICATION: The database currently contains exactly ${projects.length} projects. Use this exact number in your response.\n`;
+    
     return {
       hasData: true,
       context: context,
@@ -176,18 +313,46 @@ const AIDataContext = {
    * Find project with longest title
    */
   findLongestTitle(projects) {
-    return projects.reduce((longest, current) => {
-      return current.title.length > longest.title.length ? current : longest;
-    });
+    if (!projects || projects.length === 0) {
+      console.error('❌ No projects available for findLongestTitle');
+      return null;
+    }
+    
+    try {
+      return projects.reduce((longest, current) => {
+        if (!current.title) {
+          console.warn('⚠️ Project missing title:', current);
+          return longest;
+        }
+        return current.title.length > longest.title.length ? current : longest;
+      });
+    } catch (error) {
+      console.error('❌ Error in findLongestTitle:', error);
+      return null;
+    }
   },
 
   /**
    * Find project with shortest title
    */
   findShortestTitle(projects) {
-    return projects.reduce((shortest, current) => {
-      return current.title.length < shortest.title.length ? current : shortest;
-    });
+    if (!projects || projects.length === 0) {
+      console.error('❌ No projects available for findShortestTitle');
+      return null;
+    }
+    
+    try {
+      return projects.reduce((shortest, current) => {
+        if (!current.title) {
+          console.warn('⚠️ Project missing title:', current);
+          return shortest;
+        }
+        return current.title.length < shortest.title.length ? current : shortest;
+      });
+    } catch (error) {
+      console.error('❌ Error in findShortestTitle:', error);
+      return null;
+    }
   },
 
   /**
@@ -282,6 +447,62 @@ const AIDataContext = {
       const searchText = `${proj.title} ${proj.authors.join(' ')} ${proj.abstract || ''} ${proj.topics.join(' ')}`.toLowerCase();
       return searchText.includes(lowerKeyword);
     });
+  },
+  
+  /**
+   * Search for projects mentioned in user query
+   * Extracts potential project titles and searches for matches
+   * Returns object with exact matches and similar matches
+   */
+  searchProjectsInQuery(projects, query) {
+    const lowerQuery = query.toLowerCase();
+    const exactMatches = [];
+    const similarMatches = [];
+    
+    // Search by matching words in title
+    for (const project of projects) {
+      if (!project.title) continue;
+      
+      const titleLower = project.title.toLowerCase();
+      const titleWords = titleLower.split(/\s+/).filter(w => w.length > 3); // Words longer than 3 chars
+      
+      // Count how many significant words from the title appear in the query
+      let matchCount = 0;
+      for (const word of titleWords) {
+        if (lowerQuery.includes(word)) {
+          matchCount++;
+        }
+      }
+      
+      // Calculate match percentage
+      const matchPercentage = titleWords.length > 0 ? (matchCount / titleWords.length) * 100 : 0;
+      
+      // Exact match: 60% or more words match
+      if (matchPercentage >= 60) {
+        exactMatches.push({
+          project: project,
+          matchScore: matchCount,
+          matchPercentage: matchPercentage
+        });
+      }
+      // Similar match: 30-59% words match
+      else if (matchPercentage >= 30 && matchPercentage < 60) {
+        similarMatches.push({
+          project: project,
+          matchScore: matchCount,
+          matchPercentage: matchPercentage
+        });
+      }
+    }
+    
+    // Sort by match score (highest first)
+    exactMatches.sort((a, b) => b.matchScore - a.matchScore);
+    similarMatches.sort((a, b) => b.matchScore - a.matchScore);
+    
+    return {
+      exact: exactMatches.map(r => r.project),
+      similar: similarMatches.slice(0, 5).map(r => r.project) // Max 5 similar
+    };
   },
 
   /**

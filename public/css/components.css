@@ -101,6 +101,7 @@
    ===================== */
 .result-card,
 .stat-card,
+.saved-card,
 .fair-card {
   background: var(--surface);
   border-radius: var(--radius-lg);
@@ -335,6 +336,16 @@
   50% { transform: translateY(-20px); }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
 .fade-in {
   animation: fadeIn var(--transition-slow) ease-out;
 }
@@ -408,12 +419,7 @@
 
 .modal-body {
   padding: 24px;
-}
-
-/* =====================
-   FORMS
-   ===================== */
-.form-group {
+  position: relative;
   margin-bottom: 16px;
 }
 
@@ -460,6 +466,14 @@
 
 .form-error.hidden {
   display: none;
+}
+
+.form-hint {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  opacity: 0.8;
 }
 
 .password-input-wrapper {
@@ -672,7 +686,159 @@
   border: 2px solid var(--border-prominent); /* Dynamic border based on theme */
   overflow-x: auto;
   margin-bottom: 20px;
+  position: relative;
 }
+
+/* Blurry overlay for admin-table-container - blocks all interactions */
+.admin-table-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 10;
+  border-radius: var(--radius-lg);
+  cursor: not-allowed;
+}
+
+/* Admin Lock Overlay */
+.admin-lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.admin-lock-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-prominent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+}
+
+.admin-lock-icon:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  border-color: var(--ctu-blue);
+}
+
+.admin-lock-icon svg {
+  color: var(--ctu-blue);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.admin-lock-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Admin PIN Modal Styles */
+.admin-pin-lock-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--surface-2);
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.admin-pin-lock-icon svg {
+  color: var(--ctu-blue);
+}
+
+/* Hide lock overlay when unlocked */
+.admin-table-container.unlocked::before {
+  display: none;
+}
+
+.admin-table-container.unlocked .admin-lock-overlay {
+  display: none;
+}
+
+/* Gmail Linking Modal Styles */
+.gmail-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.gmail-link-icon svg {
+  color: white;
+}
+
+.gmail-link-info {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 16px;
+  text-align: left;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.info-item:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+.info-item svg {
+  color: var(--ctu-blue);
+  flex-shrink: 0;
+}
+
+.gmail-link-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--ctu-blue);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.gmail-link-note svg {
+  color: var(--ctu-blue);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 
 .admin-table {
   width: 100%;
@@ -1255,4 +1421,468 @@
     right: 10px;
     transform: none;
   }
+}
+
+
+/* =====================
+   NOTIFICATION ICON & PANEL
+   ===================== */
+
+/* Notification Backdrop (mobile) */
+.notification-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  display: none;
+}
+
+.notification-backdrop.hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .notification-backdrop:not(.hidden) {
+    display: block;
+  }
+}
+
+/* Notification Button */
+.notification-btn {
+  position: relative;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.notification-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--ctu-orange);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: notification-pulse 2s ease-in-out infinite;
+}
+
+.notification-badge.hidden {
+  display: none;
+}
+
+@keyframes notification-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Notification Panel */
+.notification-panel {
+  position: fixed;
+  top: 65px;
+  right: 20px;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  max-height: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.2s ease-out;
+  overflow: hidden;
+}
+
+.notification-panel.hidden {
+  display: none;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Notification Panel Header */
+.notification-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notification-panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* Notification Panel Body */
+.notification-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 420px;
+  min-height: 100px;
+}
+
+/* Empty State */
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  min-height: 200px;
+}
+
+.notification-empty svg {
+  opacity: 0.3;
+  margin-bottom: 12px;
+}
+
+.notification-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Notification Item */
+.notification-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.notification-item:hover {
+  background: var(--surface-2);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item.unread {
+  background: rgba(232, 119, 34, 0.05);
+}
+
+.notification-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--ctu-orange);
+  border-radius: 50%;
+}
+
+.notification-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.notification-item-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.notification-item-icon.info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.notification-item-icon.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.notification-item-icon.warning {
+  background: rgba(251, 146, 60, 0.1);
+  color: #fb923c;
+}
+
+.notification-item-icon.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.notification-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+}
+
+.notification-item-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 6px 0;
+  line-height: 1.5;
+}
+
+.notification-item-time {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .notification-panel {
+    top: 60px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 80px);
+  }
+  
+  .notification-panel-body {
+    max-height: calc(100vh - 140px);
+  }
+  
+  .notification-btn {
+    padding: 8px 10px;
+  }
+  
+  .notification-empty {
+    padding: 30px 20px;
+    min-height: 150px;
+  }
+  
+  .notification-empty svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-panel {
+    top: 55px;
+    right: 5px;
+    left: 5px;
+    border-radius: var(--radius);
+  }
+  
+  .notification-panel-header {
+    padding: 12px 16px;
+  }
+  
+  .notification-panel-header h3 {
+    font-size: 15px;
+  }
+  
+  .notification-item {
+    padding: 12px 16px;
+  }
+  
+  .notification-item-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .notification-item-title {
+    font-size: 13px;
+  }
+  
+  .notification-item-message {
+    font-size: 12px;
+  }
+}
+
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.status-approved {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-rejected {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Dark mode status badges */
+[data-theme="dark"] .status-pending {
+  background: rgba(255, 152, 0, 0.2);
+  color: #ffb74d;
+}
+
+[data-theme="dark"] .status-approved {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81c784;
+}
+
+[data-theme="dark"] .status-rejected {
+  background: rgba(244, 67, 54, 0.2);
+  color: #e57373;
+}
+
+
+/* Button variants for approval/rejection */
+.btn-success {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #229954;
+}
+
+.btn-error {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-error:hover {
+  background: #c0392b;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Grid layout helper */
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+
+/* Collapse toggle button */
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.collapse-toggle:hover {
+  background: var(--surface-2);
+}
+
+.collapse-toggle .chevron-icon {
+  transition: transform 0.3s ease;
+}
+
+.collapse-toggle.collapsed .chevron-icon {
+  transform: rotate(-90deg);
+}
+
+/* Pending submissions content */
+.pending-submissions-content {
+  transition: max-height 0.3s ease;
+  overflow: hidden;
 }

@@ -10,9 +10,30 @@ service cloud.firestore {
       allow write: if true;
     }
 
-    // Users — each user can only read/write their own profile
+    // Users — allow reading for duplicate checks during signup, write own profile
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow unauthenticated reads for login Gmail lookup
+      // Allow authenticated users to read any user (for duplicate checking)
+      allow read: if true;
+      // Allow creating new user during signup
+      allow create: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.data.linkedGmail is string
+        && request.resource.data.linkedGmail.matches('.*@gmail\\.com$');
+      // Allow users to update their own profile
+      allow update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Gmail links — for reverse lookup and duplicate prevention
+    match /gmail_links/{gmailAddress} {
+      // Allow unauthenticated reads for duplicate checks during signup
+      allow read: if true;
+      // Allow creating during signup
+      allow create: if request.auth != null
+        && request.resource.data.ctuEmail is string
+        && request.resource.data.userId is string;
+      // Prevent deletion to maintain data integrity
+      allow delete: if false;
     }
 
     // Saved projects — authenticated users can only access their own
@@ -32,6 +53,35 @@ service cloud.firestore {
     match /conversations/{userId} {
       // Read/Write: must be authenticated and userId must match their own UID
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Submissions — student capstone metadata submissions
+    match /submissions/{submissionId} {
+      // Helper function to get user role
+      function getUserRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      }
+
+      // Students can create submissions
+      allow create: if request.auth != null 
+        && request.resource.data.submittedBy == request.auth.uid
+        && request.resource.data.status == 'pending';
+      
+      // Users can read their own submissions
+      allow read: if request.auth != null 
+        && resource.data.submittedBy == request.auth.uid;
+      
+      // Advisers, librarians, and admins can read all submissions
+      allow read: if request.auth != null 
+        && getUserRole() in ['adviser', 'librarian', 'admin'];
+      
+      // Advisers, librarians, and admins can update submissions (for validation)
+      allow update: if request.auth != null 
+        && getUserRole() in ['adviser', 'librarian', 'admin'];
+      
+      // Only admins can delete submissions
+      allow delete: if request.auth != null 
+        && getUserRole() == 'admin';
     }
   }
 }

@@ -61,6 +61,7 @@ const AIService = {
 
   /**
    * Send message to AI (with automatic fallback)
+   * HYBRID MODE: Combines Knowledge Base + Firebase Data + Mistral AI
    */
   async sendMessage(userMessage) {
     // Check for direct answer first (faster, more accurate)
@@ -88,51 +89,38 @@ const AIService = {
     }
 
     // Check if query requires live data analysis
+    let dataContext = null;
     if (typeof AIDataContext !== 'undefined') {
       const dataAnalysis = await AIDataContext.analyzeQuery(userMessage);
       
-      if (dataAnalysis && dataAnalysis.hasData) {
-        console.log('✓ Query requires live data analysis');
-        
-        // Add user message to history
-        AIConfig.conversationHistory.push({
-          role: 'user',
-          content: userMessage
-        });
-        
-        // If data context provides complete answer, return it
-        if (dataAnalysis.context) {
-          AIConfig.conversationHistory.push({
-            role: 'assistant',
-            content: dataAnalysis.context
-          });
-          
-          return {
-            message: dataAnalysis.context,
-            provider: 'data-analysis'
-          };
-        }
-      } else if (dataAnalysis && !dataAnalysis.hasData) {
+      if (dataAnalysis && !dataAnalysis.hasData) {
         // No data available
         return {
           message: dataAnalysis.message,
           provider: 'system'
         };
       }
+      
+      if (dataAnalysis && dataAnalysis.hasData) {
+        console.log('✓ Query requires live data analysis - using HYBRID mode');
+        dataContext = dataAnalysis.context;
+        
+        // HYBRID MODE: Send data context to Mistral for intelligent response
+        // Don't return early - let Mistral process it
+      }
     }
 
-    // No direct answer found, use LLM
     // Add user message to history
     AIConfig.conversationHistory.push({
       role: 'user',
       content: userMessage
     });
 
-    // Try Mistral first
+    // Try Mistral first (with data context if available)
     if (this.mistralAvailable) {
       try {
-        console.log('🤖 Trying Mistral AI...');
-        const response = await this.sendToMistral(userMessage);
+        console.log('🤖 Trying Mistral AI' + (dataContext ? ' with Firebase data context (HYBRID)...' : '...'));
+        const response = await this.sendToMistral(userMessage, dataContext);
         
         // Add AI response to history
         AIConfig.conversationHistory.push({
@@ -142,7 +130,7 @@ const AIService = {
         
         return {
           message: response,
-          provider: 'mistral'
+          provider: dataContext ? 'hybrid-mistral' : 'mistral'
         };
         
       } catch (error) {
@@ -151,11 +139,11 @@ const AIService = {
       }
     }
 
-    // Fallback to Gemini
+    // Fallback to Gemini (with data context if available)
     if (this.geminiAvailable) {
       try {
-        console.log('🤖 Using Gemini AI (fallback)...');
-        const response = await this.sendToGemini(userMessage);
+        console.log('🤖 Using Gemini AI (fallback)' + (dataContext ? ' with Firebase data context (HYBRID)...' : '...'));
+        const response = await this.sendToGemini(userMessage, dataContext);
         
         // Add AI response to history
         AIConfig.conversationHistory.push({
@@ -165,7 +153,7 @@ const AIService = {
         
         return {
           message: response,
-          provider: 'gemini'
+          provider: dataContext ? 'hybrid-gemini' : 'gemini'
         };
         
       } catch (error) {
@@ -180,8 +168,9 @@ const AIService = {
 
   /**
    * Send message to Mistral AI
+   * HYBRID MODE: Combines Knowledge Base + Firebase Data Context
    */
-  async sendToMistral(userMessage) {
+  async sendToMistral(userMessage, dataContext = null) {
     // Build context with knowledge base
     const knowledgeContext = this.buildKnowledgeContext(userMessage);
     
@@ -190,6 +179,15 @@ const AIService = {
       { role: 'system', content: knowledgeContext },
       ...AIConfig.conversationHistory.slice(-6) // Last 3 exchanges
     ];
+    
+    // HYBRID MODE: Add Firebase data context if available
+    if (dataContext) {
+      console.log('📤 Sending data context to Mistral:', dataContext.substring(0, 200) + '...');
+      messages.push({
+        role: 'system',
+        content: `**LIVE DATABASE CONTEXT:**\n${dataContext}\n\n⚠️ CRITICAL: You MUST use ONLY the numbers and data provided above from the Firebase database. DO NOT make up, estimate, or hallucinate any numbers. If the data shows "Total Projects: 8", you MUST say 8, not any other number. The data above is the ONLY source of truth for statistics and counts.`
+      });
+    }
 
     const response = await fetch(AIConfig.mistral.apiUrl, {
       method: 'POST',
@@ -216,8 +214,9 @@ const AIService = {
 
   /**
    * Send message to Google Gemini
+   * HYBRID MODE: Combines Knowledge Base + Firebase Data Context
    */
-  async sendToGemini(userMessage) {
+  async sendToGemini(userMessage, dataContext = null) {
     // Gemini uses a different format
     const url = `${AIConfig.gemini.apiUrl}?key=${AIConfig.gemini.apiKey}`;
     
@@ -226,7 +225,12 @@ const AIService = {
       .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
       .join('\n');
     
-    const fullPrompt = `${AIConfig.systemPrompt}\n\nConversation:\n${context}`;
+    let fullPrompt = `${AIConfig.systemPrompt}\n\nConversation:\n${context}`;
+    
+    // HYBRID MODE: Add Firebase data context if available
+    if (dataContext) {
+      fullPrompt += `\n\n**LIVE DATABASE CONTEXT:**\n${dataContext}\n\n⚠️ CRITICAL: You MUST use ONLY the numbers and data provided above from the Firebase database. DO NOT make up, estimate, or hallucinate any numbers. If the data shows "Total Projects: 8", you MUST say 8, not any other number. The data above is the ONLY source of truth for statistics and counts.`;
+    }
 
     const response = await fetch(url, {
       method: 'POST',

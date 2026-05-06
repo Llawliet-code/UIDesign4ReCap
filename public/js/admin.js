@@ -139,6 +139,9 @@ const Admin = {
       // Display projects in table
       this.displayProjects(projects);
       
+      // Load pending submissions
+      await this.loadPendingSubmissions();
+      
     } catch (error) {
       console.error('Error loading projects:', error);
       tableBody.innerHTML = `
@@ -151,6 +154,338 @@ const Admin = {
       `;
     } finally {
       if (loadingEl) loadingEl.classList.add('hidden');
+    }
+  },
+
+  /**
+   * Toggle pending submissions section
+   */
+  togglePendingSubmissions() {
+    const content = document.getElementById('admin-pending-submissions-content');
+    const toggle = document.getElementById('pending-submissions-toggle');
+    
+    if (!content || !toggle) return;
+    
+    const isCollapsed = content.style.maxHeight === '0px';
+    
+    if (isCollapsed) {
+      // Expand
+      content.style.maxHeight = '2000px';
+      toggle.classList.remove('collapsed');
+    } else {
+      // Collapse
+      content.style.maxHeight = '0px';
+      toggle.classList.add('collapsed');
+    }
+  },
+
+  /**
+   * Load pending submissions
+   */
+  async loadPendingSubmissions() {
+    const container = document.getElementById('admin-pending-submissions');
+    const countBadge = document.getElementById('pending-count');
+    
+    if (!container) return;
+    
+    try {
+      // Show loading
+      container.innerHTML = `
+        <div class="text-center text-secondary py-4">
+          <div class="spinner" style="margin: 0 auto;"></div>
+        </div>
+      `;
+      
+      // Fetch pending submissions
+      const submissions = await Database.fetchPendingSubmissions();
+      
+      // Update count badge
+      if (countBadge) {
+        countBadge.textContent = `${submissions.length} Pending`;
+      }
+      
+      if (submissions.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-secondary py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; opacity: 0.3;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <div class="text-md">No pending submissions</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Display submissions
+      container.innerHTML = submissions.map(submission => this.renderPendingSubmission(submission)).join('');
+      
+    } catch (error) {
+      console.error('Error loading pending submissions:', error);
+      container.innerHTML = `
+        <div class="text-center text-error py-4">
+          <div class="text-md">Failed to load submissions</div>
+        </div>
+      `;
+    }
+  },
+
+  /**
+   * Render a pending submission card
+   */
+  renderPendingSubmission(submission) {
+    const submittedDate = submission.submittedAt ? 
+      new Date(submission.submittedAt.toDate()).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : 'N/A';
+    
+    return `
+      <div class="bg-surface-2 rounded-lg border p-4 mb-3">
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex-1">
+            <div class="text-base font-medium text-primary mb-1">${this.escapeHtml(submission.title)}</div>
+            <div class="text-sm text-secondary">
+              <strong>Authors:</strong> ${Array.isArray(submission.authors) ? submission.authors.join(', ') : submission.authors}
+            </div>
+            <div class="text-sm text-secondary">
+              <strong>Submitted by:</strong> ${this.escapeHtml(submission.submittedByName)} • ${submittedDate}
+            </div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+          <div>
+            <span class="text-secondary">Adviser:</span> ${this.escapeHtml(submission.adviser)}
+          </div>
+          <div>
+            <span class="text-secondary">Year:</span> ${submission.year}
+          </div>
+          <div>
+            <span class="text-secondary">Program:</span> ${submission.program}
+          </div>
+          <div>
+            <span class="text-secondary">Topics:</span> ${Array.isArray(submission.topics) ? submission.topics.slice(0, 2).join(', ') : 'None'}
+          </div>
+        </div>
+        
+        <div class="text-sm text-secondary mb-3">
+          <strong>Abstract:</strong> ${this.escapeHtml(submission.abstract).substring(0, 150)}${submission.abstract.length > 150 ? '...' : ''}
+        </div>
+        
+        <div class="flex gap-2">
+          <button 
+            class="btn btn-sm btn-success" 
+            onclick="Admin.approveSubmission('${submission.id}')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>
+            Approve & Publish
+          </button>
+          <button 
+            class="btn btn-sm btn-error" 
+            onclick="Admin.rejectSubmission('${submission.id}')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Reject
+          </button>
+          <button 
+            class="btn btn-sm btn-secondary" 
+            onclick="Admin.viewSubmissionDetails('${submission.id}')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Details
+          </button>
+        </div>
+      </div>
+    `;
+  },
+
+  /**
+   * Approve submission
+   */
+  async approveSubmission(submissionId) {
+    const notes = prompt('Add approval notes (optional):');
+    
+    if (notes === null) return; // User cancelled
+    
+    if (!Auth.currentUser) {
+      alert('You must be logged in to approve submissions');
+      return;
+    }
+    
+    try {
+      await Database.approveSubmission(
+        submissionId,
+        Auth.currentUser.id,
+        Auth.currentUser.name,
+        notes
+      );
+      
+      this.showNotification('Submission approved and published to RECAPS!', 'success');
+      
+      // Reload both submissions and projects
+      await this.loadPendingSubmissions();
+      await this.loadProjects();
+      
+    } catch (error) {
+      console.error('Error approving submission:', error);
+      this.showNotification('Failed to approve submission. Please try again.', 'error');
+    }
+  },
+
+  /**
+   * Reject submission
+   */
+  async rejectSubmission(submissionId) {
+    const reason = prompt('Enter rejection reason (required):');
+    
+    if (!reason || reason.trim() === '') {
+      alert('Rejection reason is required');
+      return;
+    }
+    
+    if (!Auth.currentUser) {
+      alert('You must be logged in to reject submissions');
+      return;
+    }
+    
+    const confirmed = confirm('Are you sure you want to reject this submission?');
+    if (!confirmed) return;
+    
+    try {
+      await Database.rejectSubmission(
+        submissionId,
+        Auth.currentUser.id,
+        Auth.currentUser.name,
+        reason
+      );
+      
+      this.showNotification('Submission rejected', 'success');
+      
+      // Reload submissions
+      await this.loadPendingSubmissions();
+      
+    } catch (error) {
+      console.error('Error rejecting submission:', error);
+      this.showNotification('Failed to reject submission. Please try again.', 'error');
+    }
+  },
+
+  /**
+   * View submission details
+   */
+  async viewSubmissionDetails(submissionId) {
+    try {
+      const submission = await db.collection('submissions').doc(submissionId).get();
+      
+      if (!submission.exists) {
+        alert('Submission not found');
+        return;
+      }
+      
+      const data = submission.data();
+      
+      // Create modal content
+      const modalContent = `
+        <div class="modal-overlay" id="submission-detail-modal" style="display: flex;">
+          <div class="modal-container" style="max-width: 800px;">
+            <div class="modal-header">
+              <h2 class="modal-title">Submission Details</h2>
+              <button class="modal-close" onclick="Admin.closeSubmissionDetailModal()" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+              <div class="mb-4">
+                <div class="text-sm text-secondary mb-1">Title</div>
+                <div class="text-base font-medium">${this.escapeHtml(data.title)}</div>
+              </div>
+
+              <div class="mb-4">
+                <div class="text-sm text-secondary mb-1">Authors</div>
+                <div class="text-base">${Array.isArray(data.authors) ? data.authors.join(', ') : data.authors}</div>
+              </div>
+
+              <div class="mb-4">
+                <div class="text-sm text-secondary mb-1">Adviser</div>
+                <div class="text-base">${this.escapeHtml(data.adviser)}</div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <div class="text-sm text-secondary mb-1">Year</div>
+                  <div class="text-base">${data.year}</div>
+                </div>
+                <div>
+                  <div class="text-sm text-secondary mb-1">Program</div>
+                  <div class="text-base">${data.program}</div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <div class="text-sm text-secondary mb-1">Abstract</div>
+                <div class="text-base">${this.escapeHtml(data.abstract)}</div>
+              </div>
+
+              ${data.topics && data.topics.length > 0 ? `
+                <div class="mb-4">
+                  <div class="text-sm text-secondary mb-1">Topics</div>
+                  <div class="text-base">${data.topics.join(', ')}</div>
+                </div>
+              ` : ''}
+
+              ${data.keywords && data.keywords.length > 0 ? `
+                <div class="mb-4">
+                  <div class="text-sm text-secondary mb-1">Keywords</div>
+                  <div class="text-base">${data.keywords.join(', ')}</div>
+                </div>
+              ` : ''}
+
+              ${data.findings ? `
+                <div class="mb-4">
+                  <div class="text-sm text-secondary mb-1">Key Findings</div>
+                  <div class="text-base">${this.escapeHtml(data.findings)}</div>
+                </div>
+              ` : ''}
+
+              <div class="mb-4">
+                <div class="text-sm text-secondary mb-1">Submitted By</div>
+                <div class="text-base">${this.escapeHtml(data.submittedByName)} (${this.escapeHtml(data.submittedByEmail || 'No email')})</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-success" onclick="Admin.approveSubmission('${submissionId}'); Admin.closeSubmissionDetailModal();">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><polyline points="20 6 9 17 4 12"/></svg>
+                Approve & Publish
+              </button>
+              <button class="btn btn-error" onclick="Admin.rejectSubmission('${submissionId}'); Admin.closeSubmissionDetailModal();">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reject
+              </button>
+              <button class="btn btn-secondary" onclick="Admin.closeSubmissionDetailModal()">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Add to body
+      document.body.insertAdjacentHTML('beforeend', modalContent);
+
+    } catch (error) {
+      console.error('Error viewing submission:', error);
+      alert('Failed to load submission details');
+    }
+  },
+
+  /**
+   * Close submission detail modal
+   */
+  closeSubmissionDetailModal() {
+    const modal = document.getElementById('submission-detail-modal');
+    if (modal) {
+      modal.remove();
     }
   },
 
@@ -198,10 +533,12 @@ const Admin = {
         <td>
           <div class="admin-actions">
             <button class="admin-btn admin-btn-edit ripple" data-action="edit-project" data-project-id="${project.id}">
-              ✏️ Edit
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
             </button>
             <button class="admin-btn admin-btn-delete ripple" data-action="delete-project" data-project-id="${project.id}" data-project-title="${this.escapeHtml(project.title)}">
-              🗑️ Delete
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              Delete
             </button>
           </div>
         </td>

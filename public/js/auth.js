@@ -6,6 +6,7 @@
 
 const Auth = {
   currentUser: null,
+  isCreatingAccount: false, // Flag to prevent onAuthStateChanged interference during signup
 
   // ─── HARDCODED FALLBACK ACCOUNTS ──────────────────────────────────────────
   // Temporary — replace with real Firebase accounts when ready.
@@ -45,9 +46,21 @@ const Auth = {
     try {
       const savedSession = localStorage.getItem('recap_user_session');
       if (savedSession) {
-        this.currentUser = JSON.parse(savedSession);
-        console.log('✓ Session restored');
-        return true;
+        const sessionData = JSON.parse(savedSession);
+        
+        // ⚠️ CRITICAL: Check if Firebase user is authenticated and verified
+        const firebaseUser = auth.currentUser;
+        if (firebaseUser) {
+          // Firebase user exists - verification will be checked in onAuthStateChanged
+          this.currentUser = sessionData;
+          console.log('✓ Session restored (verification will be checked)');
+          return true;
+        } else {
+          // No Firebase user - clear the localStorage session
+          console.warn('⚠️ Session found in localStorage but no Firebase user. Clearing...');
+          this.clearSession();
+          return false;
+        }
       }
     } catch (e) {
       console.error('Failed to load session:', e);
@@ -242,19 +255,73 @@ const Auth = {
     this.setLoginButtonState(true);
 
     try {
-      const credential = await auth.signInWithEmailAndPassword(emailVal, passwordVal);
+      // Try to login with the email provided (could be Gmail or CTU email)
+      let credential;
+      let loginEmail = emailVal;
+      
+      // If user enters CTU email, we need to find their linked Gmail
+      if (emailVal.toLowerCase().endsWith('@ctu.edu.ph')) {
+        try {
+          // Query Firestore to find the Gmail linked to this CTU email
+          const snapshot = await db.collection('users')
+            .where('email', '==', emailVal.toLowerCase())
+            .limit(1)
+            .get();
+          
+          if (!snapshot.empty) {
+            const userData = snapshot.docs[0].data();
+            if (userData.authEmail) {
+              loginEmail = userData.authEmail; // Use Gmail for authentication
+              console.log(`🔄 CTU email detected. Using linked Gmail for authentication: ${loginEmail}`);
+            }
+          }
+        } catch (lookupError) {
+          console.warn('Could not lookup Gmail, trying with provided email:', lookupError);
+        }
+      }
+      
+      // Authenticate with Firebase
+      credential = await auth.signInWithEmailAndPassword(loginEmail, passwordVal);
       const uid = credential.user.uid;
+      const firebaseUser = credential.user;
 
-      // Fetch profile from Firestore
+      // ⚠️ CHECK EMAIL VERIFICATION FIRST - BEFORE LOADING PROFILE
+      if (!firebaseUser.emailVerified) {
+        // Email not verified - close login modal and show verification modal
+        this.setLoginButtonState(false);
+        
+        // Close login modal first
+        this.closeLoginModal();
+        
+        // Small delay to ensure modal closes smoothly
+        setTimeout(() => {
+          this.showUnverifiedModal(firebaseUser.email);
+        }, 300);
+        
+        // Sign out immediately - don't let them stay logged in
+        await auth.signOut();
+        return; // Stop execution here
+      }
+
+      // ✅ Email is verified - continue with profile loading
       const profileDoc = await db.collection('users').doc(uid).get();
-      if (!profileDoc.exists) throw new Error('User profile not found');
+      if (!profileDoc.exists) {
+        // User authenticated but no profile found
+        await auth.signOut();
+        throw new Error('PROFILE_NOT_FOUND');
+      }
 
       const profile = profileDoc.data();
       this.currentUser = { id: uid, ...profile };
 
+      // Now call success (which will initialize everything)
       this._onLoginSuccess();
 
     } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
       // ── Fallback: check hardcoded accounts ──────────────────────────────
       const fallback = this._fallbackUsers[emailVal.toLowerCase()];
       if (fallback && fallback.password === passwordVal) {
@@ -266,13 +333,207 @@ const Auth = {
 
       this.setLoginButtonState(false);
       const emailError = document.getElementById('email-error');
-      emailError.textContent = this._friendlyError(error.code);
-      emailError.classList.remove('hidden');
-      document.getElementById('login-email').classList.add('error');
+      const passwordError = document.getElementById('password-error');
+      
+      // Determine which error to show
+      let errorMsg = '';
+      let showOnEmail = true;
+      
+      if (error.message === 'PROFILE_NOT_FOUND') {
+        errorMsg = 'Account data not found. Please contact support or create a new account.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMsg = 'Incorrect password';
+        showOnEmail = false; // Show on password field
+      } else if (error.code === 'auth/user-not-found') {
+        errorMsg = 'No account found with this email. Try using your Gmail address.';
+      } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
+        errorMsg = 'Invalid email or password. Remember to login with your Gmail address.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMsg = 'Invalid email address format';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMsg = 'Too many failed attempts. Please try again later or reset your password.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMsg = 'Network error. Check your internet connection.';
+      } else {
+        // Generic error with more details
+        errorMsg = error.message || 'Login failed. Please check your credentials and try again.';
+      }
+      
+      // Display error on appropriate field
+      if (showOnEmail) {
+        emailError.textContent = errorMsg;
+        emailError.classList.remove('hidden');
+        document.getElementById('login-email').classList.add('error');
+        passwordError.classList.add('hidden');
+        document.getElementById('login-password').classList.remove('error');
+      } else {
+        passwordError.textContent = errorMsg;
+        passwordError.classList.remove('hidden');
+        document.getElementById('login-password').classList.add('error');
+        emailError.classList.add('hidden');
+        document.getElementById('login-email').classList.remove('error');
+      }
     }
   },
 
   _onLoginSuccess() {
+    // Email is already verified at this point (checked in handleLogin)
+    // Just continue with login process
+    this.continueLogin();
+  },
+
+  /**
+   * Show unverified email modal
+   * @param {string} gmailAddress - The Gmail address that needs verification
+   */
+  showUnverifiedModal(gmailAddress) {
+    if (window.NotificationModal) {
+      NotificationModal.show({
+        type: 'warning',
+        message: '⚠️ Email Verification Required',
+        description: `
+          <div style="text-align: left; margin-top: 12px;">
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 16px; border-radius: 4px;">
+              <p style="margin: 0; font-weight: 600; color: #856404;">🔒 Account Not Verified</p>
+              <p style="margin: 8px 0 0 0; color: #856404; font-size: 13px;">
+                You cannot access the dashboard until your Gmail is verified.
+              </p>
+            </div>
+            
+            <p style="margin-bottom: 12px;"><strong>📧 Verification Email Sent To:</strong></p>
+            <p style="background: var(--surface-2); padding: 12px; border-radius: 8px; font-weight: 600; color: var(--ctu-blue); margin-bottom: 16px; word-break: break-all;">
+              ${gmailAddress}
+            </p>
+            
+            <p style="margin-bottom: 8px;"><strong>Next Steps:</strong></p>
+            <ol style="margin-left: 20px; margin-bottom: 12px; line-height: 1.8;">
+              <li>Open your <strong>Gmail inbox</strong> (${gmailAddress})</li>
+              <li>Find the verification email from Firebase</li>
+              <li>Click the verification link in the email</li>
+              <li>Come back and login again</li>
+            </ol>
+            
+            <div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 12px; margin-top: 16px; border-radius: 4px;">
+              <p style="margin: 0; font-size: 13px; color: #0d47a1;">
+                💡 <strong>Tip:</strong> Check your spam/junk folder if you don't see the email in your inbox.
+              </p>
+            </div>
+            
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 12px; font-style: italic;">
+              The verification email was sent when you created your account. If you can't find it, click "Resend Verification" below.
+            </p>
+          </div>
+        `,
+        actions: [
+          {
+            label: 'Open Gmail',
+            variant: 'primary',
+            action: () => {
+              window.open('https://mail.google.com', '_blank');
+              NotificationModal.close();
+            }
+          },
+          {
+            label: 'Resend Verification',
+            variant: 'secondary',
+            action: async () => {
+              try {
+                // Re-authenticate to get the user object
+                const emailVal = document.getElementById('login-email').value.trim();
+                const passwordVal = document.getElementById('login-password').value;
+                
+                let loginEmail = emailVal;
+                
+                // If CTU email, find Gmail
+                if (emailVal.toLowerCase().endsWith('@ctu.edu.ph')) {
+                  try {
+                    const snapshot = await db.collection('users')
+                      .where('email', '==', emailVal.toLowerCase())
+                      .limit(1)
+                      .get();
+                    
+                    if (!snapshot.empty) {
+                      const userData = snapshot.docs[0].data();
+                      if (userData.authEmail) {
+                        loginEmail = userData.authEmail;
+                      }
+                    }
+                  } catch (lookupError) {
+                    console.warn('Could not lookup Gmail:', lookupError);
+                  }
+                }
+                
+                const credential = await auth.signInWithEmailAndPassword(loginEmail, passwordVal);
+                const user = credential.user;
+                
+                await user.sendEmailVerification({
+                  url: window.location.origin + '/index.html?verified=true',
+                  handleCodeInApp: false
+                });
+                
+                // Sign out after sending
+                await auth.signOut();
+                
+                NotificationModal.show({
+                  type: 'success',
+                  message: '✅ Verification Email Sent!',
+                  description: `
+                    <div style="text-align: left; margin-top: 12px;">
+                      <p style="margin-bottom: 12px;">A new verification email has been sent to:</p>
+                      <p style="background: var(--surface-2); padding: 12px; border-radius: 8px; font-weight: 600; color: var(--ctu-blue); margin-bottom: 12px; word-break: break-all;">
+                        📧 ${gmailAddress}
+                      </p>
+                      <p style="font-size: 13px; color: var(--text-secondary);">
+                        Please check your Gmail inbox and spam folder.
+                      </p>
+                    </div>
+                  `,
+                  actions: [
+                    {
+                      label: 'Open Gmail',
+                      variant: 'primary',
+                      action: () => {
+                        window.open('https://mail.google.com', '_blank');
+                        NotificationModal.close();
+                      }
+                    },
+                    {
+                      label: 'OK',
+                      variant: 'secondary',
+                      action: () => NotificationModal.close()
+                    }
+                  ]
+                });
+              } catch (error) {
+                console.error('Error resending verification:', error);
+                
+                let errorMsg = 'Failed to resend verification email. Please try again later.';
+                if (error.code === 'auth/too-many-requests') {
+                  errorMsg = 'Too many requests. Please wait a few minutes before trying again.';
+                }
+                
+                NotificationModal.show({
+                  type: 'error',
+                  message: '❌ Error Sending Email',
+                  description: errorMsg,
+                  actions: [{ label: 'OK', variant: 'primary', action: () => NotificationModal.close() }]
+                });
+              }
+            }
+          },
+          {
+            label: 'Cancel',
+            variant: 'secondary',
+            action: () => {
+              NotificationModal.close();
+            }
+          }
+        ]
+      });
+    }
+  },
+
+  continueLogin() {
     // Save session to localStorage
     this.saveSession();
 
@@ -300,15 +561,25 @@ const Auth = {
       if (typeof Navigation !== 'undefined') {
         Navigation.switchView('dashboard');
         setTimeout(() => {
-          const roleTabs = document.querySelectorAll('.role-tab');
-          let target = null;
-          roleTabs.forEach(tab => {
-            if (tab.dataset.role === this.currentUser.role && tab.style.display !== 'none') {
-              target = tab;
+          // ADMIN AUTO-REDIRECT: If user is admin, go directly to Admin Panel
+          if (this.currentUser.role === 'admin') {
+            const adminTab = document.querySelector('.role-tab[data-role="admin"]');
+            if (adminTab && typeof Navigation !== 'undefined') {
+              Navigation.switchRole(adminTab, 'admin');
+              console.log('✓ Admin user redirected to Admin Panel');
             }
-          });
-          if (!target) target = document.querySelector('.role-tab:not([style*="display: none"])');
-          if (target && typeof Navigation !== 'undefined') Navigation.switchRole(target, target.dataset.role);
+          } else {
+            // For non-admin users, use default role tab logic
+            const roleTabs = document.querySelectorAll('.role-tab');
+            let target = null;
+            roleTabs.forEach(tab => {
+              if (tab.dataset.role === this.currentUser.role && tab.style.display !== 'none') {
+                target = tab;
+              }
+            });
+            if (!target) target = document.querySelector('.role-tab:not([style*="display: none"])');
+            if (target && typeof Navigation !== 'undefined') Navigation.switchRole(target, target.dataset.role);
+          }
         }, 100);
       }
     }, 1500);
@@ -331,69 +602,12 @@ const Auth = {
 
     if (!this.validateSignupForm(data)) return;
 
-    const btn = document.getElementById('signup-submit');
-    btn.disabled = true;
-    btn.querySelector('.btn-text')?.classList.add('hidden');
-    btn.querySelector('.btn-spinner')?.classList.remove('hidden');
-
-    try {
-      // Create Firebase Auth account
-      const credential = await auth.createUserWithEmailAndPassword(data.email, data.password);
-      const uid = credential.user.uid;
-
-      // Save profile to Firestore
-      const profile = {
-        name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        studentId: data.studentId || '',
-        program: data.program || 'N/A',
-        role: 'student',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      };
-
-      await db.collection('users').doc(uid).set(profile);
-
-      this.currentUser = { id: uid, ...profile };
-
-      // Save session to localStorage
-      this.saveSession();
-
-      // Reinitialize conversation manager for logged-in user
-      if (typeof ConversationManager !== 'undefined') {
-        ConversationManager.init();
-      }
-
-      // Show success
-      const form = document.getElementById('signup-form');
-      const success = document.getElementById('signup-success');
-      if (form) form.classList.add('hidden');
-      if (success) success.classList.remove('hidden');
-
-      setTimeout(() => {
-        this.closeSignupModal();
-        this.updateUIForLoggedInUser();
-        
-        // Reinitialize chatbot view state
-        if (typeof Chat !== 'undefined') {
-          Chat.initChatbotViewState();
-          // Show chat FAB for logged-in users
-          Chat.initChatFABVisibility();
-        }
-        
-        if (typeof Navigation !== 'undefined') Navigation.switchView('dashboard');
-      }, 1500);
-
-    } catch (error) {
-      btn.disabled = false;
-      btn.querySelector('.btn-text')?.classList.remove('hidden');
-      btn.querySelector('.btn-spinner')?.classList.add('hidden');
-
-      const emailError = document.getElementById('signup-email-error');
-      if (emailError) {
-        emailError.textContent = this._friendlyError(error.code);
-        emailError.classList.remove('hidden');
-        document.getElementById('signup-email').classList.add('error');
-      }
+    // Instead of creating account directly, open Gmail linking modal
+    if (typeof GmailLink !== 'undefined') {
+      GmailLink.openModal(data);
+    } else {
+      console.error('GmailLink module not found');
+      alert('Gmail linking system not available. Please refresh the page.');
     }
   },
 
@@ -456,8 +670,21 @@ const Auth = {
   // ─── UI UPDATE ────────────────────────────────────────────────────────────
 
   updateUIForLoggedInUser() {
-    if (!this.currentUser) return;    const welcomeSpan = document.querySelector('.dash-welcome span');
+    if (!this.currentUser) return;
+    
+    // Update dashboard welcome name
+    const welcomeSpan = document.getElementById('dash-user-name');
     if (welcomeSpan) welcomeSpan.textContent = this.currentUser.name;
+
+    // Update dashboard emails display
+    const ctuEmailSpan = document.getElementById('dash-ctu-email');
+    const gmailSpan = document.getElementById('dash-gmail');
+    if (ctuEmailSpan && this.currentUser.email) {
+      ctuEmailSpan.textContent = this.currentUser.email;
+    }
+    if (gmailSpan && this.currentUser.linkedGmail) {
+      gmailSpan.textContent = this.currentUser.linkedGmail;
+    }
 
     const roleBadge = document.querySelector('.role-badge');
     if (roleBadge) {
@@ -540,13 +767,23 @@ const Auth = {
     if (!data.lastName) setError('signup-lastname', 'Last name is required');
     else clearError('signup-lastname');
 
-    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
-      setError('signup-email', 'Please enter a valid email address');
-    else clearError('signup-email');
+    // Email validation: Must be @ctu.edu.ph
+    if (!data.email) {
+      setError('signup-email', 'Email is required');
+    } else if (!/^[^\s@]+@ctu\.edu\.ph$/i.test(data.email)) {
+      setError('signup-email', 'Only @ctu.edu.ph email addresses are allowed');
+    } else {
+      clearError('signup-email');
+    }
 
-    if (!data.password || data.password.length < 6)
-      setError('signup-password', 'Password must be at least 6 characters');
-    else clearError('signup-password');
+    // Password validation: Minimum 8 characters
+    if (!data.password) {
+      setError('signup-password', 'Password is required');
+    } else if (data.password.length < 8) {
+      setError('signup-password', 'Password must be at least 8 characters');
+    } else {
+      clearError('signup-password');
+    }
 
     if (data.password !== data.confirmPassword) {
       const input = document.getElementById('signup-confirm-password');
@@ -562,6 +799,78 @@ const Auth = {
     }
 
     return isValid;
+  },
+
+  // ─── LIVE VALIDATION ──────────────────────────────────────────────────────
+
+  setupLiveValidation() {
+    // Email validation on blur
+    const emailInput = document.getElementById('signup-email');
+    if (emailInput) {
+      emailInput.addEventListener('blur', () => {
+        const email = emailInput.value.trim();
+        const error = document.getElementById('signup-email-error');
+        
+        if (email && !/^[^\s@]+@ctu\.edu\.ph$/i.test(email)) {
+          emailInput.classList.add('error');
+          if (error) {
+            error.textContent = 'Only @ctu.edu.ph email addresses are allowed';
+            error.classList.remove('hidden');
+          }
+        } else if (email) {
+          emailInput.classList.remove('error');
+          if (error) error.classList.add('hidden');
+        }
+      });
+
+      // Clear error on focus
+      emailInput.addEventListener('focus', () => {
+        emailInput.classList.remove('error');
+        const error = document.getElementById('signup-email-error');
+        if (error) error.classList.add('hidden');
+      });
+    }
+
+    // Password validation on input
+    const passwordInput = document.getElementById('signup-password');
+    if (passwordInput) {
+      passwordInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+        const error = document.getElementById('signup-password-error');
+        
+        if (password.length > 0 && password.length < 8) {
+          passwordInput.classList.add('error');
+          if (error) {
+            error.textContent = `Password must be at least 8 characters (${password.length}/8)`;
+            error.classList.remove('hidden');
+          }
+        } else {
+          passwordInput.classList.remove('error');
+          if (error) error.classList.add('hidden');
+        }
+      });
+    }
+
+    // Confirm password validation on input
+    const confirmInput = document.getElementById('signup-confirm-password');
+    if (confirmInput && passwordInput) {
+      confirmInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+        const confirm = confirmInput.value;
+        const error = document.getElementById('signup-confirm-error');
+        
+        if (confirm.length > 0 && password !== confirm) {
+          confirmInput.classList.add('error');
+          if (error) {
+            error.textContent = 'Passwords do not match';
+            error.classList.remove('hidden');
+          }
+        } else {
+          confirmInput.classList.remove('error');
+          if (error) error.classList.add('hidden');
+        }
+      });
+    }
   },
 
   // ─── MISC ─────────────────────────────────────────────────────────────────
@@ -594,8 +903,95 @@ const Auth = {
       'auth/too-many-requests': 'Too many attempts. Please try again later',
       'auth/network-request-failed': 'Network error. Check your connection',
       'auth/invalid-credential': 'Invalid email or password',
+      'auth/invalid-login-credentials': 'Invalid email or password',
     };
     return map[code] || 'Something went wrong. Please try again.';
+  },
+
+  /**
+   * Check if user just verified their email and handle redirect
+   */
+  checkVerificationRedirect() {
+    // Check URL parameters for verification success
+    const urlParams = new URLSearchParams(window.location.search);
+    const verified = urlParams.get('verified');
+    
+    if (verified === 'true') {
+      console.log('✅ User returned from email verification');
+      
+      // Check if there's a Firebase user
+      const firebaseUser = auth.currentUser;
+      if (firebaseUser) {
+        // Reload user to get updated emailVerified status
+        firebaseUser.reload().then(() => {
+          if (firebaseUser.emailVerified) {
+            console.log('✅ Email verified! Auto-logging in...');
+            
+            // Show success message
+            if (window.NotificationModal) {
+              NotificationModal.show({
+                type: 'success',
+                message: '✅ Email Verified Successfully!',
+                description: `
+                  <div style="text-align: left; margin-top: 12px;">
+                    <p style="margin-bottom: 12px;">Your Gmail has been verified!</p>
+                    <p style="margin-bottom: 12px;">You are now being logged in...</p>
+                  </div>
+                `,
+                actions: [
+                  {
+                    label: 'Continue',
+                    variant: 'primary',
+                    action: () => {
+                      NotificationModal.close();
+                      // Trigger onAuthStateChanged to load profile
+                      window.location.href = window.location.origin + '/index.html';
+                    }
+                  }
+                ]
+              });
+            } else {
+              // No modal available, just reload
+              window.location.href = window.location.origin + '/index.html';
+            }
+          } else {
+            console.warn('⚠️ Email not yet verified');
+          }
+        });
+      } else {
+        // No Firebase user - show login prompt
+        console.log('ℹ️ No active session. Please login.');
+        
+        if (window.NotificationModal) {
+          NotificationModal.show({
+            type: 'success',
+            message: '✅ Email Verified!',
+            description: `
+              <div style="text-align: left; margin-top: 12px;">
+                <p style="margin-bottom: 12px;">Your Gmail has been verified successfully!</p>
+                <p style="margin-bottom: 12px;">Please login with your Gmail address to access your account.</p>
+              </div>
+            `,
+            actions: [
+              {
+                label: 'Login Now',
+                variant: 'primary',
+                action: () => {
+                  NotificationModal.close();
+                  this.showLoginModal();
+                }
+              }
+            ]
+          });
+        } else {
+          // No modal, just show login
+          this.showLoginModal();
+        }
+        
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
   },
 
   // ─── INIT ─────────────────────────────────────────────────────────────────
@@ -604,26 +1000,40 @@ const Auth = {
     // Try to restore session from localStorage first
     const sessionRestored = this.loadSession();
     if (sessionRestored) {
-      this.updateUIForLoggedInUser();
+      // Don't initialize UI yet - wait for onAuthStateChanged to verify email
+      console.log('✓ Session found, waiting for Firebase auth state verification...');
       
-      // Reinitialize conversation manager for restored session
-      if (typeof ConversationManager !== 'undefined') {
-        ConversationManager.init();
-      }
-      
-      // Reinitialize chatbot view state for restored session
-      if (typeof Chat !== 'undefined') {
-        Chat.initChatbotViewState();
-        Chat.initChatFABVisibility();
-      }
-      
-      console.log('✓ User session restored from localStorage');
+      // Note: UI will be updated in onAuthStateChanged after verification check
     }
 
     // Listen to Firebase Auth state — fires on every page load if user is signed in
     auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
+        // Skip verification check if we're in the middle of creating an account
+        if (this.isCreatingAccount) {
+          console.log('⏳ Account creation in progress, skipping verification check...');
+          return;
+        }
+        
         try {
+          // ⚠️ CRITICAL: Check email verification FIRST
+          if (!firebaseUser.emailVerified) {
+            console.warn('⚠️ Unverified user detected on page load. Logging out...');
+            
+            // Clear any stored session
+            this.clearSession();
+            this.currentUser = null;
+            
+            // Sign out from Firebase
+            await auth.signOut();
+            
+            // Show verification modal
+            this.showUnverifiedModal(firebaseUser.email);
+            
+            return; // Stop here - don't load profile or initialize anything
+          }
+          
+          // ✅ Email is verified - continue loading profile
           const profileDoc = await db.collection('users').doc(firebaseUser.uid).get();
           if (profileDoc.exists) {
             this.currentUser = { id: firebaseUser.uid, ...profileDoc.data() };
@@ -653,6 +1063,9 @@ const Auth = {
       }
     });
 
+    // Check if user just verified their email (coming back from verification link)
+    this.checkVerificationRedirect();
+
     // Login form
     const loginForm = document.getElementById('login-form');
     if (loginForm) loginForm.addEventListener('submit', (e) => this.handleLogin(e));
@@ -660,6 +1073,9 @@ const Auth = {
     // Signup form
     const signupForm = document.getElementById('signup-form');
     if (signupForm) signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+
+    // Setup live validation for signup form
+    this.setupLiveValidation();
 
     // Close on overlay click
     ['login-modal', 'signup-modal', 'logout-modal'].forEach(id => {

@@ -1122,7 +1122,7 @@ body.theme-transitioning {
 .results-count {
   font-size: 20px;
   color: var(--text-secondary);
-  border: 2px solid var(--border-prominent); /* Dynamic border based on theme */
+
 
 }
 
@@ -1254,6 +1254,36 @@ body.theme-transitioning {
   margin-top: 10px;
 }
 
+.save-btn {
+  background: none;
+  border: 0.5px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.save-btn:hover {
+  border-color: var(--ctu-blue);
+  color: var(--ctu-blue);
+}
+
+/* Saved state — orange highlight */
+.save-btn[aria-pressed="true"] {
+  background: var(--ctu-orange-light);
+  border-color: var(--ctu-orange);
+  color: var(--ctu-orange);
+}
+
+.save-btn[aria-pressed="true"]:hover {
+  background: var(--ctu-orange);
+  color: #fff;
+  border-color: var(--ctu-orange);
+}
+
 .view-btn {
   background: var(--ctu-blue);
   color: #fff;
@@ -1336,7 +1366,7 @@ body.theme-transitioning {
 }
 
 .detail-authors {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-secondary);
   margin-bottom: 16px;
 }
@@ -1357,9 +1387,11 @@ body.theme-transitioning {
 }
 
 .section-content {
-  font-size: 14px;
+  font-size: 20px;
+    text-align: justify;
+
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 2;
 }
 
 .future-research-box {
@@ -1431,7 +1463,6 @@ body.theme-transitioning {
   font-size: 11px;
   color: var(--text-secondary);
 }
-
 .cite-btn {
   width: 100%;
   background: var(--ctu-blue);
@@ -1555,6 +1586,46 @@ body.theme-transitioning {
 }
 
 /* Layout styles moved to layout.css */
+
+.saved-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.saved-card:hover {
+  border-color: var(--ctu-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.saved-meta {
+  font-size: 12px;
+  color: var(--text-hint);
+}
+
+.saved-remove {
+  font-size: 11px;
+  color: var(--ctu-orange);
+  margin-top: 6px;
+  margin-left: 6px;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.saved-remove:hover {
+  opacity: 0.8;
+}
 
 .adviser-panel {
   background: var(--surface);
@@ -2625,6 +2696,9 @@ body.theme-transitioning {
     grid-template-columns: repeat(2, 1fr); 
   }
   
+  .saved-grid { 
+    grid-template-columns: 1fr; 
+  }
   
   .hero h1 { 
     font-size: 24px; 
@@ -2793,6 +2867,7 @@ body.theme-transitioning {
     gap: 6px;
   }
 
+  .save-btn,
   .view-btn {
     font-size: 11px;
     padding: 5px 10px;
@@ -2840,6 +2915,10 @@ body.theme-transitioning {
     padding: 12px;
   }
 
+  /* Saved grid */
+  .saved-grid {
+    grid-template-columns: 1fr;
+  }
 
   /* Stat cards */
   .stat-num {

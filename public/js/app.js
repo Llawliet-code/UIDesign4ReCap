@@ -62,6 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✓ Chat initialized');
   }
 
+  // Initialize Notifications
+  if (typeof Notifications !== 'undefined') {
+    Notifications.init();
+    console.log('✓ Notifications initialized');
+  }
+
   // Initialize Conversation Manager
   if (typeof ConversationManager !== 'undefined') {
     ConversationManager.init();
@@ -88,6 +94,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✓ Citation initialized');
   }
 
+  if (typeof StudentUpload !== 'undefined') {
+    StudentUpload.init();
+    console.log('✓ Student Upload initialized');
+  }
+
+  if (typeof StudentSubmissions !== 'undefined') {
+    StudentSubmissions.init();
+    console.log('✓ Student Submissions initialized');
+  }
+
+  if (typeof AdminAttention !== 'undefined') {
+    AdminAttention.init();
+    console.log('✓ Admin Attention initialized');
+  }
+
   if (typeof Projects !== 'undefined') {
     Projects.init();
     console.log('✓ Projects initialized');
@@ -97,6 +118,62 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Set up global event listeners for data-attribute based interactions
   setupGlobalListeners();
+  
+  // Auto-load data if user is logged in and on dashboard
+  setTimeout(() => {
+    if (Auth.currentUser) {
+      const dashboardView = document.getElementById('view-dashboard');
+      
+      // ADMIN AUTO-REDIRECT: If admin user and not on dashboard, redirect to Admin Panel
+      if (Auth.currentUser.role === 'admin') {
+        if (!dashboardView || !dashboardView.classList.contains('active')) {
+          // Admin is not on dashboard, redirect them
+          if (typeof Navigation !== 'undefined') {
+            console.log('✓ Redirecting admin to Admin Panel...');
+            Navigation.switchView('dashboard');
+            setTimeout(() => {
+              const adminTab = document.querySelector('.role-tab[data-role="admin"]');
+              if (adminTab && typeof Navigation !== 'undefined') {
+                Navigation.switchRole(adminTab, 'admin');
+              }
+            }, 200);
+          }
+        } else {
+          // Admin is already on dashboard, just switch to admin tab
+          const adminTab = document.querySelector('.role-tab[data-role="admin"]');
+          if (adminTab && typeof Navigation !== 'undefined') {
+            Navigation.switchRole(adminTab, 'admin');
+          }
+        }
+      } else if (dashboardView && dashboardView.classList.contains('active')) {
+        // Non-admin users: load data for their current role
+        // Only load if user is authenticated and verified
+        if (typeof Auth !== 'undefined' && Auth.currentUser) {
+          const activeRoleTab = document.querySelector('.role-tab.active');
+          if (activeRoleTab) {
+            const role = activeRoleTab.dataset.role;
+            if (role === 'student' && typeof StudentSubmissions !== 'undefined') {
+              console.log('Auto-loading student submissions...');
+              StudentSubmissions.loadSubmissions();
+            } else if (role === 'admin' && typeof Admin !== 'undefined') {
+              console.log('Auto-loading admin data...');
+              Admin.loadProjects();
+            } else if (role === 'librarian' && typeof Librarian !== 'undefined') {
+              console.log('Auto-loading librarian data...');
+              Librarian.loadRecentUploads();
+            }
+          }
+        } else {
+          console.log('⚠️ User not authenticated, skipping data load');
+        }
+      }
+      
+      // Check for new pending submissions (admin/librarian only)
+      if (typeof AdminAttention !== 'undefined') {
+        AdminAttention.checkForNewSubmissions();
+      }
+    }
+  }, 500); // Small delay to ensure Auth is fully loaded
 });
 
 /**
@@ -261,6 +338,12 @@ function handleAction(action, element) {
       break;
     case 'confirm-logout':
       if (typeof Auth !== 'undefined') Auth.confirmLogout();
+      break;
+    case 'show-upload-metadata':
+      if (typeof StudentUpload !== 'undefined') StudentUpload.showModal();
+      break;
+    case 'close-upload-metadata':
+      if (typeof StudentUpload !== 'undefined') StudentUpload.closeModal();
       break;
     case 'show-add-project':
       if (typeof Admin !== 'undefined') Admin.showAddProjectModal();

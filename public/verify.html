@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification - RECAP</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .verify-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: var(--background);
+    }
+
+    .verify-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .verify-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .verify-icon.loading {
+      background: var(--surface-2);
+    }
+
+    .verify-icon.success {
+      background: #d4edda;
+    }
+
+    .verify-icon.error {
+      background: #f8d7da;
+    }
+
+    .verify-icon svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .verify-icon.loading svg {
+      color: var(--ctu-blue);
+      animation: spin 1s linear infinite;
+    }
+
+    .verify-icon.success svg {
+      color: #28a745;
+    }
+
+    .verify-icon.error svg {
+      color: #dc3545;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .verify-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .verify-message {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .verify-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="verify-container">
+    <div class="verify-card">
+      <!-- Loading State -->
+      <div id="verify-loading">
+        <div class="verify-icon loading">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+        </div>
+        <h1 class="verify-title">Verifying Your Email...</h1>
+        <p class="verify-message">Please wait while we verify your email address.</p>
+      </div>
+
+      <!-- Success State -->
+      <div id="verify-success" class="hidden">
+        <div class="verify-icon success">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h1 class="verify-title">Email Verified!</h1>
+        <p class="verify-message">Your email has been successfully verified. You can now login and access the dashboard.</p>
+        <div class="verify-actions">
+          <a href="index.html" class="btn btn-blue">Go to Login</a>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div id="verify-error" class="hidden">
+        <div class="verify-icon error">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <h1 class="verify-title">Verification Failed</h1>
+        <p class="verify-message" id="error-message">The verification link is invalid or has expired.</p>
+        <div class="verify-actions">
+          <a href="index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <script src="js/firebase-config.js"></script>
+  <script src="js/custom-email-verification.js"></script>
+  
+  <script>
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const uid = urlParams.get('uid');
+
+    // Verify email
+    async function verifyEmail() {
+      try {
+        if (!token || !uid) {
+          throw new Error('Invalid verification link');
+        }
+
+        // Verify the token
+        const result = await CustomEmailVerification.verifyToken(token, uid);
+
+        // Show success
+        document.getElementById('verify-loading').classList.add('hidden');
+        document.getElementById('verify-success').classList.remove('hidden');
+
+      } catch (error) {
+        console.error('Verification error:', error);
+        
+        // Show error
+        document.getElementById('verify-loading').classList.add('hidden');
+        document.getElementById('verify-error').classList.remove('hidden');
+        document.getElementById('error-message').textContent = error.message || 'The verification link is invalid or has expired.';
+      }
+    }
+
+    // Run verification when page loads
+    verifyEmail();
+  </script>
+</body>
+</html>

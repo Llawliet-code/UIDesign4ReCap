@@ -334,13 +334,7 @@ const Database = {
           abstract: "This study developed an attendance system utilizing facial recognition algorithms to automate student tracking. The system achieved 94.3% accuracy across varied lighting conditions and reduced manual recording time by 78%...",
           topics: ["Machine Learning", "Facial Recognition", "Computer Vision"],
           keywords: ["OpenCV", "Python", "CNN"],
-          methodology: "Developmental research methodology with structured survey of 45 faculty members.",
-          findings: "94.3% recognition accuracy, 78% reduction in attendance recording time, SUS score of 84.2",
-          futureResearch: [
-            "Extend the system to support mask-wearing detection",
-            "Integrate with mobile app for parent notifications",
-            "Explore edge computing deployment"
-          ]
+          findings: "94.3% recognition accuracy, 78% reduction in attendance recording time, SUS score of 84.2"
         },
         {
           title: "IoT-Based Soil Moisture Detection System Using Arduino for Precision Agriculture in Coastal Communities",
@@ -351,13 +345,7 @@ const Database = {
           abstract: "An IoT-enabled precision agriculture system that monitors real-time soil conditions using Arduino Mega microcontrollers and DHT22 sensors...",
           topics: ["IoT", "Hardware", "Agriculture"],
           keywords: ["Arduino", "Sensors", "Agriculture"],
-          methodology: "Experimental design with field testing",
-          findings: "Improved irrigation efficiency by 45%, reduced water waste by 32%",
-          futureResearch: [
-            "Add weather prediction integration",
-            "Expand to multiple crop types",
-            "Implement solar power system"
-          ]
+          findings: "Improved irrigation efficiency by 45%, reduced water waste by 32%"
         }
       ];
       
@@ -370,6 +358,145 @@ const Database = {
       
     } catch (error) {
       console.error('Error initializing sample data:', error);
+      return false;
+    }
+  },
+
+  /**
+   * Fetch pending submissions (for adviser/librarian)
+   */
+  async fetchPendingSubmissions() {
+    try {
+      const snapshot = await db.collection('submissions')
+        .where('status', '==', 'pending')
+        .orderBy('submittedAt', 'desc')
+        .get();
+      
+      const submissions = [];
+      snapshot.forEach(doc => {
+        submissions.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      console.log(`✓ Fetched ${submissions.length} pending submissions`);
+      return submissions;
+      
+    } catch (error) {
+      console.error('Error fetching pending submissions:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Fetch user's submissions
+   */
+  async fetchUserSubmissions(userId) {
+    try {
+      // Check if user is authenticated
+      if (!auth.currentUser) {
+        console.warn('⚠️ Cannot fetch submissions: User not authenticated');
+        return [];
+      }
+      
+      const snapshot = await db.collection('submissions')
+        .where('submittedBy', '==', userId)
+        .orderBy('submittedAt', 'desc')
+        .get();
+      
+      const submissions = [];
+      snapshot.forEach(doc => {
+        submissions.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      console.log(`✓ Fetched ${submissions.length} user submissions`);
+      return submissions;
+      
+    } catch (error) {
+      console.error('Error fetching user submissions:', error);
+      
+      // If permission error, provide helpful message
+      if (error.code === 'permission-denied' || error.message.includes('Missing or insufficient permissions')) {
+        console.error('⚠️ Firestore rules not deployed! Run: firebase deploy --only firestore:rules');
+      }
+      
+      return [];
+    }
+  },
+
+  /**
+   * Approve submission and move to projects collection
+   */
+  async approveSubmission(submissionId, validatorId, validatorName, notes = '') {
+    try {
+      // Get submission data
+      const submissionDoc = await db.collection('submissions').doc(submissionId).get();
+      
+      if (!submissionDoc.exists) {
+        throw new Error('Submission not found');
+      }
+      
+      const submissionData = submissionDoc.data();
+      
+      // Create project from submission
+      const projectData = {
+        title: submissionData.title,
+        authors: submissionData.authors,
+        adviser: submissionData.adviser,
+        year: submissionData.year,
+        program: submissionData.program,
+        abstract: submissionData.abstract,
+        topics: submissionData.topics || [],
+        keywords: submissionData.keywords || [],
+        findings: submissionData.findings || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      
+      // Add to projects collection
+      const projectRef = await db.collection('projects').add(projectData);
+      
+      // Update submission status
+      await db.collection('submissions').doc(submissionId).update({
+        status: 'approved',
+        validatedBy: validatorId,
+        validatedByName: validatorName,
+        validatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        validationNotes: notes,
+        projectId: projectRef.id
+      });
+      
+      console.log('✓ Submission approved and added to projects');
+      return projectRef.id;
+      
+    } catch (error) {
+      console.error('Error approving submission:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Reject submission
+   */
+  async rejectSubmission(submissionId, validatorId, validatorName, notes = '') {
+    try {
+      await db.collection('submissions').doc(submissionId).update({
+        status: 'rejected',
+        validatedBy: validatorId,
+        validatedByName: validatorName,
+        validatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        validationNotes: notes
+      });
+      
+      console.log('✓ Submission rejected');
+      return true;
+      
+    } catch (error) {
+      console.error('Error rejecting submission:', error);
       return false;
     }
   }

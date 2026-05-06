@@ -59,6 +59,23 @@
           <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </span>
       </button>
+      
+      <!-- Notification Icon -->
+      <button 
+        id="notification-btn" 
+        class="btn btn-ghost notification-btn" 
+        aria-label="Notifications"
+        title="Notifications"
+        data-action="toggle-notifications">
+        <span class="notification-icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notification-badge hidden" id="notification-badge">0</span>
+        </span>
+      </button>
+      
       <!-- Auth buttons (shown when logged out) -->
       <div class="nav-auth-buttons" id="nav-auth-buttons">
         <button class="btn btn-ghost nav-login-btn" data-action="show-login" aria-label="Login to your account">Login</button>
@@ -134,6 +151,34 @@
       </div>
     </div>
   </nav>
+
+  <!-- =====================
+       NOTIFICATION PANEL
+       ===================== -->
+  <!-- Notification Backdrop -->
+  <div class="notification-backdrop hidden" id="notification-backdrop"></div>
+  
+  <!-- Notification Panel -->
+  <div class="notification-panel hidden" id="notification-panel" role="dialog" aria-label="Notifications">
+    <div class="notification-panel-header">
+      <h3>Notifications</h3>
+      <button class="btn-icon" id="mark-all-read-btn" aria-label="Mark all as read" title="Mark all as read">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div class="notification-panel-body" id="notification-list">
+      <!-- Notifications will be dynamically inserted here -->
+      <div class="notification-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <p>No notifications</p>
+      </div>
+    </div>
+  </div>
 
   <!-- =====================
        PAGE TABS
@@ -312,16 +357,17 @@
   <div class="view" id="view-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
     <div class="dash-header">
       <div>
-        <div class="dash-welcome">Welcome back! <span>Juan dela Cruz</span>
+        <div class="dash-welcome">Welcome back! <span id="dash-user-name">Juan dela Cruz</span>
         </div>
-        <div class="text-md text-secondary mt-1">Last login: April 26, 2026</div>
+        <div class="text-md text-secondary mt-1" id="dash-user-emails">
+          <span id="dash-ctu-email">test@ctu.edu.ph</span> • <span id="dash-gmail">john@gmail.com</span>
+        </div>
       </div>
       <span class="role-badge">Student — BSIT 3A</span>
     </div>
 
     <div class="role-tabs" id="role-tabs">
       <div class="role-tab active" data-role="student" data-allowed-roles="student,adviser,librarian,admin">Student View</div>
-      <div class="role-tab" data-role="adviser" data-allowed-roles="adviser,admin">Adviser View</div>
       <div class="role-tab" data-role="librarian" data-allowed-roles="librarian,admin">Librarian View</div>
       <div class="role-tab" data-role="admin" data-allowed-roles="admin">Admin Panel</div>
     </div>
@@ -333,6 +379,37 @@
         <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Recent Searches</div></div>
         <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Cited Works</div></div>
       </div>
+      
+      <!-- Submit Capstone Section -->
+      <div class="bg-surface rounded-lg border p-5 mb-5">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <div class="text-lg font-medium text-primary">Submit Your Capstone</div>
+            <div class="text-md text-secondary mt-1">Upload your capstone project metadata for librarian validation</div>
+          </div>
+          <button class="btn btn-orange text-base p-2" data-action="show-upload-metadata">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload Metadata
+          </button>
+        </div>
+        <div class="text-sm text-secondary">
+          <strong>Note:</strong> Your submission will be reviewed and validated by the Librarian before officially uploading it to the official website <a href="https://re-caps.web.app/" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">RECAPS</a>.
+        </div>
+      </div>
+
+      <!-- My Submissions Section -->
+      <div class="bg-surface rounded-lg border p-5 mb-5">
+        <div class="text-lg font-medium text-primary mb-3">My Submissions</div>
+        <div id="student-submissions-list">
+          <!-- Dynamically populated -->
+          <div class="text-center text-secondary py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; opacity: 0.3;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <div class="text-md">No submissions yet</div>
+            <div class="text-sm mt-1">Click "Upload Metadata" to submit your first capstone project</div>
+          </div>
+        </div>
+      </div>
+      
       <div class="text-md font-medium text-primary mb-3">My Saved Research</div>
       <div class="saved-grid" id="saved-projects-grid">
         <!-- Dynamically populated -->
@@ -423,6 +500,35 @@
       </button>
     </div>
 
+    <!-- Pending Submissions Section -->
+    <div class="bg-surface rounded-lg border mb-5">
+      <div class="flex justify-between items-center p-5 cursor-pointer" onclick="Admin.togglePendingSubmissions()" style="cursor: pointer;">
+        <div class="flex items-center gap-3">
+          <button class="collapse-toggle" id="pending-submissions-toggle" aria-label="Toggle pending submissions">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div>
+            <div class="text-lg font-medium text-primary">Pending Submissions</div>
+            <div class="text-sm text-secondary mt-1">Review and approve student submissions</div>
+          </div>
+        </div>
+        <span class="status-badge status-pending" id="pending-count">0 Pending</span>
+      </div>
+      <div id="admin-pending-submissions-content" class="pending-submissions-content" style="max-height: 2000px; overflow: hidden; transition: max-height 0.3s ease;">
+        <div class="px-5 pb-5">
+          <div id="admin-pending-submissions">
+            <!-- Dynamically populated -->
+            <div class="text-center text-secondary py-8">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; opacity: 0.3;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <div class="text-md">No pending submissions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Statistics Cards -->
     <div class="dash-grid mb-5">
       <div class="stat-card">
@@ -457,9 +563,7 @@
       <select id="admin-filter-program" class="admin-filter-select">
         <option value="">All Programs</option>
         <option value="BSIT">BSIT</option>
-        <option value="BSCS">BSCS</option>
-        <option value="BSED">BSED</option>
-        <option value="BSAgriBusiness">BSAgriBusiness</option>
+        <option value="BSED">BSIE</option>
       </select>
       <button class="btn btn-blue ripple" data-action="admin-refresh">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:4px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh
@@ -467,7 +571,17 @@
     </div>
 
     <!-- Projects Table -->
-    <div class="admin-table-container">
+    <div class="admin-table-container" id="admin-table-container">
+      <!-- Padlock Icon Overlay -->
+      <div class="admin-lock-overlay" id="admin-lock-overlay">
+        <div class="admin-lock-icon" id="admin-lock-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <p class="admin-lock-text">Click to unlock</p>
+        </div>
+      </div>
       <table class="admin-table">
         <thead>
           <tr>
@@ -893,6 +1007,196 @@
 </div>
 
 <!-- =====================
+     STUDENT UPLOAD METADATA MODAL
+     ===================== -->
+<div class="modal-overlay hidden" id="upload-metadata-modal" role="dialog" aria-labelledby="upload-metadata-title" aria-modal="true">
+  <div class="modal-container modal-large">
+    <div class="modal-header">
+      <h2 id="upload-metadata-title" class="modal-title">Submit Capstone Metadata</h2>
+      <button class="modal-close" data-action="close-upload-metadata" aria-label="Close modal"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Auto-save indicator (floating) -->
+      <div class="auto-save-indicator hidden" id="auto-save-indicator">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:middle">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        <span id="auto-save-text">Draft saved</span>
+      </div>
+      
+      <p class="text-md text-secondary mb-4">Submit your capstone project metadata. All fields marked with * are required.</p>
+      
+      <form id="upload-metadata-form" data-form="upload-metadata">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="upload-title" class="form-label">Project Title *</label>
+            <input 
+              type="text" 
+              id="upload-title" 
+              class="form-input" 
+              placeholder="Enter your capstone project title"
+              required
+            />
+            <span class="form-error hidden" id="upload-title-error">Project title is required</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="upload-authors" class="form-label">Authors * (comma-separated)</label>
+            <input 
+              type="text" 
+              id="upload-authors" 
+              class="form-input" 
+              placeholder="e.g., Reyes, A., Santos, M., Dela Cruz, J."
+              required
+            />
+            <span class="form-error hidden" id="upload-authors-error">Authors are required</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="upload-adviser" class="form-label">Adviser *</label>
+            <input 
+              type="text" 
+              id="upload-adviser" 
+              class="form-input" 
+              placeholder="e.g., Prof. Elena Villanueva"
+              required
+            />
+            <span class="form-error hidden" id="upload-adviser-error">Adviser is required</span>
+          </div>
+          <div class="form-group flex-1">
+            <label for="upload-year" class="form-label">Year *</label>
+            <input 
+              type="text" 
+              id="upload-year" 
+              class="form-input" 
+              placeholder="e.g., 2024"
+              required
+              pattern="[0-9]{4}"
+              title="Please enter a 4-digit year (e.g., 2024)"
+            />
+            <span class="form-error hidden" id="upload-year-error">Year is required</span>
+          </div>
+          <div class="form-group flex-1">
+            <label for="upload-program" class="form-label">Program *</label>
+            <select id="upload-program" class="form-input" required>
+              <option value="">Select Program</option>
+              <option value="BSIT">BSIT</option>
+              <option value="BSIE">BSIE</option>
+            </select>
+            <span class="form-error hidden" id="upload-program-error">Program is required</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="upload-abstract" class="form-label">Abstract *</label>
+            <textarea 
+              id="upload-abstract" 
+              class="form-textarea" 
+              rows="4"
+              placeholder="Enter your project abstract..."
+              required
+            ></textarea>
+            <span class="form-error hidden" id="upload-abstract-error">Abstract is required</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="upload-topics" class="form-label">
+              Topics (comma-separated)
+              <span class="tooltip-trigger" data-tooltip="topics">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">
+                  Research topics or categories (e.g., Machine Learning, IoT, Web Development). Separate multiple topics with commas.
+                </span>
+              </span>
+            </label>
+            <input 
+              type="text" 
+              id="upload-topics" 
+              class="form-input" 
+              placeholder="e.g., Machine Learning, IoT, Web Development"
+            />
+          </div>
+          <div class="form-group flex-1">
+            <label for="upload-keywords" class="form-label">Keywords (comma-separated)</label>
+            <input 
+              type="text" 
+              id="upload-keywords" 
+              class="form-input" 
+              placeholder="e.g., Python, Arduino, React"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="upload-findings" class="form-label">
+              Key Findings
+              <span class="tooltip-trigger" data-tooltip="findings">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-content">
+                  Main results, conclusions, or discoveries from the research. Summarize the most important outcomes and insights.
+                </span>
+              </span>
+            </label>
+            <textarea 
+              id="upload-findings" 
+              class="form-textarea" 
+              rows="3"
+              placeholder="Enter key findings and results..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3 bg-surface-2 rounded-md">
+          <p class="text-sm text-secondary">
+            <strong>Note:</strong> Your Submission Will Review and Validate By the Librarian before Officially uplaod it to the officail website <a href="https://re-caps.web.app/">RECAPS</a>
+          </p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-action="close-upload-metadata">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-orange ripple" id="upload-metadata-submit">
+            <span class="btn-text">Submit for Validation</span>
+            <span class="btn-spinner hidden">
+              <span class="spinner"></span> Submitting...
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div class="login-success hidden" id="upload-metadata-success">
+        <div class="success-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3 class="text-xl font-semibold text-primary mb-2">Submission Successful!</h3>
+        <p class="text-md text-secondary mb-4">
+          <strong>Note:</strong> Your submission will be reviewed and validated by the Librarian before officially uploading it to the official website <a href="https://re-caps.web.app/" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">RECAPS</a>.
+        </p>
+        <p class="text-sm text-secondary mb-4">
+          You can check the status of your submission in the "My Submissions" section.
+        </p>
+        <button type="button" class="btn btn-primary" data-action="close-upload-metadata">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================
      LOGIN MODAL
      ===================== -->
 <div class="modal-overlay hidden" id="login-modal" role="dialog" aria-labelledby="login-title" aria-modal="true">
@@ -1014,13 +1318,14 @@
         <div class="form-group">
           <label for="signup-email" class="form-label">Email Address *</label>
           <input type="email" id="signup-email" class="form-input" placeholder="you@ctu.edu.ph" required autocomplete="email" />
-          <span class="form-error hidden" id="signup-email-error">Please enter a valid email</span>
+          <span class="form-hint text-sm text-secondary mt-1 mb-4">Only @ctu.edu.ph emails are allowed</span>
+          <span class="form-error hidden" id="signup-email-error">Please enter a valid @ctu.edu.ph email</span>
         </div>
 
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="signup-student-id" class="form-label">Student ID</label>
-            <input type="text" id="signup-student-id" class="form-input" placeholder="e.g., 2021-12345" autocomplete="off" />
+            <label for="signup-student-id" class="form-label">Student ID / Teacher ID</label>
+            <input type="text" id="signup-student-id" class="form-input" placeholder="e.g., 8230" autocomplete="off" />
           </div>
           <div class="form-group flex-1">
             <label for="signup-program" class="form-label">Program</label>
@@ -1035,14 +1340,15 @@
         <div class="form-group">
           <label for="signup-password" class="form-label">Password *</label>
           <div class="password-input-wrapper">
-            <input type="password" id="signup-password" class="form-input" placeholder="At least 6 characters" required autocomplete="new-password" />
+            <input type="password" id="signup-password" class="form-input" placeholder="At least 8 characters" required autocomplete="new-password" />
             <button type="button" class="password-toggle" data-action="toggle-signup-password" aria-label="Toggle password visibility">
               <span class="password-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </span>
             </button>
           </div>
-          <span class="form-error hidden" id="signup-password-error">Password must be at least 6 characters</span>
+          <span class="form-hint text-sm text-secondary mt-1">Use a strong password with at least 8 characters</span>
+          <span class="form-error hidden" id="signup-password-error">Password must be at least 8 characters</span>
         </div>
 
         <div class="form-group">
@@ -1059,7 +1365,7 @@
         </div>
 
         <div class="form-group">
-          <button type="submit" class="btn btn-orange w-full ripple" id="signup-submit">
+          <button type="submit" class="btn btn-orange w-full ripple mt-4" id="signup-submit">
             <span class="btn-text">Create Account</span>
             <span class="btn-spinner hidden"><span class="spinner"></span> Creating...</span>
           </button>
@@ -1179,10 +1485,145 @@
   </div>
 </div>
 
+<!-- =====================
+     GMAIL LINKING MODAL
+     ===================== -->
+<div class="modal-overlay hidden" id="gmail-link-modal" role="dialog" aria-labelledby="gmail-link-title" aria-modal="true">
+  <div class="modal-container" style="max-width: 480px;">
+    <div class="modal-header">
+      <h2 id="gmail-link-title" class="modal-title">Link Gmail Account</h2>
+      <button class="modal-close" id="gmail-link-close" aria-label="Close Gmail linking modal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="text-center mb-4">
+        <div class="gmail-link-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <p class="text-lg font-semibold text-primary mb-2">One More Step!</p>
+        <p class="text-sm text-secondary mb-3">
+          To prevent duplicate accounts and secure your access, please link your <strong id="gmail-link-ctu-email">CTU email</strong> to a Gmail account.
+        </p>
+        <div class="gmail-link-info">
+          <div class="info-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>Prevents duplicate registrations</span>
+          </div>
+          <div class="info-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>Adds extra security layer</span>
+          </div>
+          <div class="info-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span>Easy account recovery</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="gmail-link-input" class="form-label">Gmail Address *</label>
+        <input 
+          type="email" 
+          id="gmail-link-input" 
+          class="form-input" 
+          placeholder="your.email@gmail.com"
+          autocomplete="email"
+        />
+        <span class="form-hint text-sm text-secondary mt-1">Enter your personal Gmail address</span>
+        <p class="text-sm text-danger mt-2 hidden" id="gmail-link-error">Please enter a valid Gmail address</p>
+      </div>
+      
+      <div class="gmail-link-note">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span>This Gmail will be used for account verification and recovery. You can only link one Gmail per CTU email.</span>
+      </div>
+      
+      <div class="flex gap-3 mt-4">
+        <button class="btn btn-secondary flex-1" id="gmail-link-cancel">Cancel</button>
+        <button class="btn btn-blue flex-1" id="gmail-link-submit">
+          <span class="btn-text">Link & Continue</span>
+          <span class="btn-spinner hidden"><span class="spinner"></span> Linking...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================
+     ADMIN PIN UNLOCK MODAL
+     ===================== -->
+<div class="modal-overlay hidden" id="admin-pin-modal" role="dialog" aria-labelledby="admin-pin-title" aria-modal="true">
+  <div class="modal-container" style="max-width: 400px;">
+    <div class="modal-header">
+      <h2 id="admin-pin-title" class="modal-title">Enter Admin PIN</h2>
+      <button class="modal-close" id="admin-pin-close" aria-label="Close PIN modal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="text-center mb-4">
+        <div class="admin-pin-lock-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <p class="text-md text-primary mb-2">Admin Access Required</p>
+        <p class="text-sm text-secondary">Enter your PIN to unlock the admin table</p>
+      </div>
+      
+      <div class="form-group">
+        <label for="admin-pin-input" class="form-label">PIN Code</label>
+        <input 
+          type="password" 
+          id="admin-pin-input" 
+          class="form-input" 
+          placeholder="Enter 4-digit PIN"
+          maxlength="4"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+        <p class="text-sm text-danger mt-2 hidden" id="admin-pin-error">Incorrect PIN. Please try again.</p>
+      </div>
+      
+      <div class="flex gap-3 mt-4">
+        <button class="btn btn-secondary flex-1" id="admin-pin-cancel">Cancel</button>
+        <button class="btn btn-blue flex-1" id="admin-pin-submit">Unlock</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="js/firebase-config.js"></script>
 <script src="js/database.js"></script>
 <script src="js/api-keys.js"></script>
-<script src="js/api-keys-checker.js"></script>
+<parameter name="api-keys-checker.js"></script>
 <script src="js/groq-config.js"></script>
 <script src="js/groq-service.js"></script>
 <script src="js/ai-knowledge-base.js"></script>
@@ -1197,13 +1638,20 @@
 <script src="js/search.js"></script>
 <script src="js/projects.js"></script>
 <script src="js/chat.js"></script>
+<script src="js/notifications.js"></script>
 <script src="js/notification-modal.js"></script>
 <script src="js/conversation-manager.js"></script>
 <script src="js/utils.js"></script>
+<script src="js/gmail-link.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/librarian.js"></script>
+<script src="js/student-upload.js"></script>
+<script src="js/student-submissions.js"></script>
+<script src="js/admin-pin-lock.js"></script>
+<script src="js/admin-attention.js"></script>
 <script src="js/citation.js"></script>
+<script src="js/diagnostic.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

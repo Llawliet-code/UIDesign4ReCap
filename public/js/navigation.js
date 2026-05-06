@@ -91,6 +91,22 @@ const Navigation = {
     // Smooth scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
+    // Load data when switching to dashboard
+    if (viewName === 'dashboard' && Auth.currentUser) {
+      // Check which role tab is active and load appropriate data
+      const activeRoleTab = document.querySelector('.role-tab.active');
+      if (activeRoleTab) {
+        const role = activeRoleTab.dataset.role;
+        if (role === 'student' && typeof StudentSubmissions !== 'undefined') {
+          StudentSubmissions.loadSubmissions();
+        } else if (role === 'admin' && typeof Admin !== 'undefined') {
+          Admin.loadProjects();
+        } else if (role === 'librarian' && typeof Librarian !== 'undefined') {
+          Librarian.loadRecentUploads();
+        }
+      }
+    }
+    
     // Focus management for accessibility
     if (activeView) {
       const firstFocusable = activeView.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -118,7 +134,7 @@ const Navigation = {
     document.querySelectorAll('.role-tab').forEach(tab => tab.classList.remove('active'));
     element.classList.add('active');
 
-    ['student', 'adviser', 'librarian', 'admin'].forEach(r => {
+    ['student', 'librarian', 'admin'].forEach(r => {
       const panel = document.getElementById(`dash-${r}`);
       if (panel) {
         panel.classList.toggle('hidden', r !== role);
@@ -130,6 +146,8 @@ const Navigation = {
       Admin.loadProjects();
     } else if (role === 'librarian' && typeof Librarian !== 'undefined') {
       Librarian.loadRecentUploads();
+    } else if (role === 'student' && typeof StudentSubmissions !== 'undefined') {
+      StudentSubmissions.loadSubmissions();
     }
   },
 
